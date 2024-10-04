@@ -26,6 +26,7 @@ import { useState, useRef, useEffect } from "react";
 import Resizer from "react-image-file-resizer";
 import CropImageDialog from "./CropImageDialog";
 import { useUpdateUserProfileMutation } from "./mutation";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function EditProfileDialog({
   user,
@@ -50,7 +51,7 @@ export default function EditProfileDialog({
   const mutation = useUpdateUserProfileMutation();
 
   async function onSubmit(values: UpdateUserValues) {
-    // implement
+
     const newAvatarUrl = croppedAvatar
       ? new File([croppedAvatar], `avatar_${user.id}.webp`)
       : undefined;
@@ -59,13 +60,18 @@ export default function EditProfileDialog({
       { values, avatar: newAvatarUrl },
       {
         onSuccess: () => {
-          setCroppedAvatar(null);
-          setCroppedAvatarUrl(null);
-          onOpenChange(false);
+          handleDialogClose(false);
         },
       },
     );
   }
+
+  const handleDialogClose = (open: boolean) => {
+    setCroppedAvatar(null);
+    setCroppedAvatarUrl(null);
+    form.reset();
+    onOpenChange(open);
+  };
 
   useEffect(() => {
     if (croppedAvatar) {
@@ -83,12 +89,7 @@ export default function EditProfileDialog({
   return (
     <Dialog
       open={open}
-      onOpenChange={(open) => {
-        onOpenChange(open);
-        setCroppedAvatar(null);
-        setCroppedAvatarUrl(null);
-        form.reset();
-      }}
+      onOpenChange={handleDialogClose}
     >
       <DialogContent>
         <DialogHeader>
@@ -122,8 +123,9 @@ export default function EditProfileDialog({
                 <FormItem>
                   <FormLabel>Bio</FormLabel>
                   <FormControl>
-                    <Input
+                    <Textarea
                       placeholder="Give a short bio about yourself"
+                      className="resize-none min-h-24"
                       {...field}
                     />
                   </FormControl>
@@ -140,13 +142,9 @@ export default function EditProfileDialog({
                 Save
               </LoadingButton>
               <Button
+                type="button"
                 variant={"ghost"}
-                onClick={() => {
-                  onOpenChange(false);
-                  setCroppedAvatar(null);
-                  setCroppedAvatarUrl(null);
-                  form.reset();
-                }}
+                onClick={() => handleDialogClose(false)}
               >
                 Cancel
               </Button>

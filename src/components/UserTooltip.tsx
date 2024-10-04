@@ -44,18 +44,13 @@ export default function UserTooltip({ user, children }: UserTooltipProps) {
                   <h3>{user.displayName}</h3>
                 </Link>
                 <Link href={`/users/${user.username}`}>
-                  <p>@{user.username}</p>
+                  <p className="hover:underline">@{user.username}</p>
                 </Link>
               </div>
               {user.id !== loggedInUser.id && (
                 <FollowButton userId={user.id} initialState={followerState} />
               )}
             </div>
-            {user.bio && (
-              <Linkify>
-                <div className="hidden lg:block">{user.bio}</div>
-              </Linkify>
-            )}
           </div>
         </TooltipContent>
       </Tooltip>

@@ -3,7 +3,7 @@
 import { lucia } from "@/auth";
 import prisma from "@/lib/prisma";
 import { SignUpValues, signUpSchema } from "@/lib/validation";
-import { hash } from "@node-rs/argon2";
+import { hash } from "@/lib/validation";
 import { generateIdFromEntropySize } from "lucia";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { cookies } from "next/headers";
@@ -15,12 +15,7 @@ export async function signUp(
   try {
     const { email, username, password } = signUpSchema.parse(credentials);
 
-    const passwordHash = await hash(password, {
-      memoryCost: 19456,
-      timeCost: 2,
-      outputLen: 32,
-      parallelism: 1,
-    });
+    const passwordHash = hash(password);
 
     const userId = generateIdFromEntropySize(10);
     const existingUserName = await prisma.user.findFirst({

@@ -31,8 +31,7 @@ export function useUpdateUserProfileMutation() {
         avatar && startAvatarUpload([avatar]),
       ]);
     },
-    onSuccess: async ([updatedUser, uploadResult]) => {
-      console.log(uploadResult);
+    onSuccess: async () => {
       const queryFilter: QueryFilters = {
         queryKey: ["user-posts"],
       };

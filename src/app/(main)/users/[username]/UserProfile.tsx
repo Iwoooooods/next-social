@@ -7,6 +7,8 @@ import FollowButton from "@/components/FollowButton";
 import FollowerCount from "./FollowerCount";
 import { useSession } from "../../SessionProvider";
 import EditProfileButton from "./EditProfileButton";
+import Linkify from "@/components/Linkify";
+
 const UserProfile: React.FC<{ user: UserData; loggedInUserId: string }> = ({
   user,
   loggedInUserId,
@@ -52,7 +54,10 @@ const UserProfile: React.FC<{ user: UserData; loggedInUserId: string }> = ({
           </p>
         </div>
         <p>member since {formatDate(new Date(user.createdAt), "MMM d yyyy")}</p>
-        {user.bio && <p>{user.bio}</p>}
+        <hr className="w-full" />
+        <Linkify>
+          {user.bio && <div className="whitespace-pre-wrap">{user.bio}</div>}
+        </Linkify>
       </div>
     </div>
   );

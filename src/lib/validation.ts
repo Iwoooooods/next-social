@@ -1,4 +1,5 @@
 import { z } from "zod";
+import crypto from 'crypto';
 
 const requiredString = z.string().trim().min(1, "Required");
 
@@ -19,6 +20,7 @@ export type LoginValues = z.infer<typeof loginSchema>;
 
 export const createPostSchema = z.object({
   content: requiredString,
+  mediaIds: z.array(z.string()).max(5, "Maximum of 5 attachments"),
 });
 
 export const updateUserSchema = z.object({
@@ -28,3 +30,14 @@ export const updateUserSchema = z.object({
 
 export type UpdateUserValues = z.infer<typeof updateUserSchema>;
   
+export function hash(password: string) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+export function verify(password: string, hashedPassword: string) {
+  const [salt, storedHash] = hashedPassword.split(':');
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  return storedHash === hash;
+}

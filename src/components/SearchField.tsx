@@ -30,7 +30,7 @@ export default function SearchField({className}: {className?: string}) {
           disabled={!query.trim()}
           variant="ghost"
           type="submit"
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent"
+          className="absolute right-0 top-1/2 -translate-y-1/2 hover:bg-transparent hover:text-accent-foreground hover:scale-110"
         >
           <Image src="/search.svg" alt="search" width={16} height={16} />
         </Button>

@@ -14,10 +14,14 @@ import { cn } from "@/lib/utils";
 import { User2Icon } from "lucide-react";
 import { logout } from "@/app/(auth)/action";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function UserButton({ className }: { className?: string }) {
   const { user } = useSession();
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -33,11 +37,16 @@ export default function UserButton({ className }: { className?: string }) {
       <DropdownMenuContent>
         <DropdownMenuLabel>Logged in as {user.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Link href={`/users/${user.username}`} className="flex w-full items-center">
+        <DropdownMenuItem
+          onSelect={() => {
+            setOpen(false);
+            router.push(`/users/${user.username}`);
+          }}
+        >
+          <div className="flex w-full items-center">
             <User2Icon className="mr-2 size-4" />
             Profile
-          </Link>
+          </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

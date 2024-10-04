@@ -6,6 +6,7 @@ export interface Attachment {
   file: File;
   mediaId?: string;
   isUploading: boolean;
+  url?: string;
 }
 
 export default function useMediaUpload() {
@@ -48,14 +49,10 @@ export default function useMediaUpload() {
             ...attachment,
             mediaId: uploadResult.serverData.mediaId,
             isUploading: false,
+            url: uploadResult.url,
           };
         }),
       );
-
-      toast({
-        title: "Uploaded",
-        description: "Your attachments have been uploaded",
-      });
     },
 
     onUploadError(error) {
@@ -92,7 +89,7 @@ export default function useMediaUpload() {
     startUpload(files);
   }
 
-  function removeAttachment(fileName: string) {
+   function removeAttachment(fileName: string) {
     setAttachments((prev) =>
       prev.filter((attachment) => attachment.file.name !== fileName),
     );

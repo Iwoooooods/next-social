@@ -12,6 +12,7 @@ import { useDeletePostMutation } from "./mutation";
 import { PostData } from "@/lib/types";
 import LoadingButton from "@/components/LoadingButton";
 import { Trash2 } from "lucide-react";
+import { deleteAttachments } from "./action";
 
 export default function DeletePostDialog({
   open,
@@ -37,14 +38,24 @@ export default function DeletePostDialog({
           <LoadingButton
             loading={mutation.isPending}
             variant="destructive"
-            onClick={() =>
-              mutation.mutate(post.id, { onSuccess: () => onClose() })
-            }
+            onClick={() => {
+              mutation.mutate(post.id, { onSuccess: () => onClose() });
+              deleteAttachments(
+                post.attachments.map(
+                  (attachment) =>
+                    attachment.url.split(
+                      `/a/${process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID}/`,
+                    )[1],
+                ),
+              );
+            }}
           >
             <Trash2 className="mr-2" />
             Delete
           </LoadingButton>
-          <Button onClick={onClose} variant="ghost">Cancel</Button>
+          <Button onClick={onClose} variant="ghost">
+            Cancel
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

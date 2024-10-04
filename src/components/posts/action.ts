@@ -3,6 +3,7 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import { getPostDataInclude } from "@/lib/types";
+import { UTApi } from "uploadthing/server";
 
 export async function deletePost(id: string){
     const {user} = await validateRequest();
@@ -25,4 +26,8 @@ export async function deletePost(id: string){
     });
 
     return deletedPost;
+}
+
+export async function deleteAttachments(fileNames: string[]) {
+    await new UTApi().deleteFiles(fileNames);
 }

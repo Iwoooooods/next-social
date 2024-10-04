@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Loader2, Plus, X } from "lucide-react";
 import { useRef } from "react";
+import { deleteAttachment } from "./action";
 
 export const PostEditor = React.memo(() => {
   const { user } = useSession();
@@ -45,6 +46,7 @@ export const PostEditor = React.memo(() => {
   const input = editor?.getText({ blockSeparator: "\n" }) || "";
 
   const onSubmit = async () => {
+    console.log("onSubmit", attachments);
     mutation.mutate(
       {
         content: input,
@@ -59,6 +61,13 @@ export const PostEditor = React.memo(() => {
         },
       },
     );
+  };
+
+  const handleRemoveAttachment = async (fileName: string, url?: string) => {
+    if (!url) return;
+    const urlFileName = url.split(`/f/`)[1];
+    removeAttachment(fileName);
+    await deleteAttachment(urlFileName);
   };
 
   return (
@@ -81,7 +90,7 @@ export const PostEditor = React.memo(() => {
             <AttachmentPreview
               key={attachment.file.name}
               attachment={attachment}
-              removeAttachment={removeAttachment}
+              removeAttachment={handleRemoveAttachment}
             />
           ))}
         </div>
@@ -109,7 +118,7 @@ const AttachmentPreview = ({
 }: {
   key: string;
   attachment: Attachment;
-  removeAttachment: (mediaId: string) => void;
+  removeAttachment: (fileName: string, url?: string) => void;
 }) => {
   const src = URL.createObjectURL(attachment.file);
   return (
@@ -120,10 +129,7 @@ const AttachmentPreview = ({
           alt="Attachment"
           width={100}
           height={100}
-          className={cn(
-            "relative",
-            attachment.isUploading && "opacity-50",
-          )}
+          className={cn("relative", attachment.isUploading && "opacity-50")}
         />
       ) : (
         <video controls className="h-full w-full">
@@ -137,7 +143,7 @@ const AttachmentPreview = ({
       ) : (
         <Button
           variant="ghost"
-          onClick={() => removeAttachment(attachment.file.name)}
+          onClick={() => removeAttachment(attachment.file.name, attachment.url)}
           className="absolute right-0 top-0 h-fit w-fit p-0 hover:bg-transparent"
         >
           <X size={24} />

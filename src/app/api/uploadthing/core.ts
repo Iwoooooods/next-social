@@ -62,7 +62,7 @@ export const fileRouter = {
           type: file.type.startsWith("image") ? "IMAGE" : "VIDEO",
         },
       });
-      return { mediaId: media.id };
+      return { mediaId: media.id, url: media.url };
     }),
 } satisfies FileRouter;
 

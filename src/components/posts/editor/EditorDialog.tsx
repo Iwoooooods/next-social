@@ -2,14 +2,14 @@
 
 import { Dialog, DialogClose, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { SquarePen, ArrowLeft, ArrowRight, X, Plus } from "lucide-react";
+import { SquarePen, ArrowLeft, ArrowRight, X, Plus, Check } from "lucide-react";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import useMediaUpload, { Attachment } from "@/hooks/useMediaUpload";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, createRef } from "react";
 import LoadingButton from "@/components/LoadingButton";
 import Image from "next/image";
 import { useState } from "react";
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { DialogDescription } from "@/components/ui/dialog";
 import { Cropper, ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import { useEditor } from "@tiptap/react";
+import { Editor, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent } from "@tiptap/react";
@@ -25,16 +25,23 @@ import { useSession } from "@/app/(main)/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
 import { useSubmitPostMutation } from "./mutation";
 import { Dispatch, SetStateAction, memo, RefObject } from "react";
+import { deleteAttachment } from "./action";
+import "./styles.css";
 
 export default function EditorDialog() {
   const [open, setOpen] = useState(false);
-
+  const [currentStep, setCurrentStep] = useState<"crop" | "text">("crop");
   const mediaUploader = useMediaUpload();
 
   const onFileSelected = (files: File[]) => {
     mediaUploader.setAttachments((prev) => [
       ...prev,
-      ...files.map((file) => ({ file, isUploading: false })),
+      ...files.map((file) => {
+        const extension = file.name.split(".").pop();
+        const newFileName = `${file.name.replace(`.${extension}`, "")}_${crypto.randomUUID()}.${extension}`;
+        const renamedFile = new File([file], newFileName, { type: file.type });
+        return { file: renamedFile, isUploading: false };
+      }),
     ]);
   };
 
@@ -45,6 +52,7 @@ export default function EditorDialog() {
         setOpen(open);
         if (!open) {
           mediaUploader.reset();
+          setCurrentStep("crop");
         }
       }}
     >
@@ -55,9 +63,13 @@ export default function EditorDialog() {
         </span>
       </DialogTrigger>
       <DialogContent
-        className={`flex flex-col items-center gap-2 overflow-hidden border-none bg-card p-0 text-card-foreground`}
+        className={`flex flex-col items-center gap-2 overflow-hidden border-none bg-card p-0 text-card-foreground ${
+          mediaUploader.attachments.length > 0 &&
+          currentStep === "text" &&
+          "max-w-[960px]"
+        }`}
       >
-        <DialogHeader className="p-4">
+        <DialogHeader className="px-4 py-2">
           <DialogTitle className="text-center">Create a new post</DialogTitle>
           <DialogDescription className="text-center">
             What's on your mind?
@@ -67,8 +79,11 @@ export default function EditorDialog() {
           <MediaPicker onFileSelected={onFileSelected} />
         ) : (
           <MediaPreview
+            setOpen={setOpen}
             uploader={mediaUploader}
             onFileSelected={onFileSelected}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
           />
         )}
       </DialogContent>
@@ -111,180 +126,261 @@ function MediaPicker({ onFileSelected }: MediaPickerProps) {
 function MediaPreview({
   uploader,
   onFileSelected,
+  currentStep,
+  setCurrentStep,
+  setOpen,
 }: {
   uploader: ReturnType<typeof useMediaUpload>;
   onFileSelected: (files: File[]) => void;
+  currentStep: "crop" | "text";
+  setCurrentStep: Dispatch<SetStateAction<"crop" | "text">>;
+  setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
-  const [textEditorOpen, setTextEditorOpen] = useState(false);
   const width = 512;
-  const [showContinueButton, setShowContinueButton] = useState(true);
+  const mutation = useSubmitPostMutation();
   const [aspectRatio, setAspectRatio] = useState<number>(1);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const cropperRef = useRef<ReactCropperElement>(null);
+  const [cropperRefs, setCropperRefs] = useState<
+    RefObject<ReactCropperElement>[]
+  >([]);
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        bold: false,
+        italic: false,
+      }),
+      Placeholder.configure({
+        placeholder: "What's on your mind?",
+      }),
+    ],
+    autofocus: true,
+  });
 
-  async function handleContinue() {
-    crop(currentIndex);
-    // await uploader.startUpload(
-    //   uploader.attachments.map((attachment) => attachment.file),
-    // );
-    setShowContinueButton(false);
-    setTextEditorOpen(true);
+  const input = editor?.getText({ blockSeparator: "\n" }) || "";
+
+  const onPostSubmit = async () => {
+    mutation.mutate(
+      {
+        content: input,
+        mediaIds: uploader.attachments
+          .map((attachment) => attachment.mediaId)
+          .filter(Boolean) as string[],
+      },
+      {
+        onSuccess: () => {
+          editor?.commands.clearContent();
+          uploader.reset();
+          setOpen(false);
+        },
+      },
+    );
+  };
+
+  async function handleLastStep() {
+    if (currentStep === "text") {
+      setCurrentStep("crop");
+      // delete the uploaded media
+      await deleteAttachment(
+        uploader.attachments
+          .map((attachment) => {
+            const fileName = attachment.url?.split("https://utfs.io/f/")[1];
+            console.log(fileName);
+            return fileName;
+          })
+          .filter(Boolean) as string[],
+      );
+    }
+    if (currentStep === "crop") {
+      uploader.reset();
+    }
+  }
+
+  async function handleNextStep() {
+    await uploader.startUpload(
+      uploader.attachments.map((attachment) => attachment.file),
+    );
+    setCurrentStep("text");
   }
 
   function crop(index: number) {
-    const cropper = cropperRef.current?.cropper;
-    if (!cropper) return;
-    cropper.getCroppedCanvas().toBlob((blob) => {
-      if (blob) {
-        const newFile = new File(
-          [blob],
-          uploader.attachments[index].file.name,
-          {
-            type: "image/jpeg",
-          },
-        );
-        uploader.setAttachments((prev: Attachment[]) =>
-          prev.map((attachment, i) =>
-            i === index ? { ...attachment, file: newFile } : attachment,
-          ),
-        );
+    return new Promise<void>((resolve) => {
+      const cropper = cropperRefs[index].current?.cropper;
+      if (!cropper) {
+        resolve();
+        return;
       }
-    }, "image/jpeg");
+      cropper.getCroppedCanvas().toBlob((blob) => {
+        if (blob) {
+          const newFile = new File(
+            [blob],
+            uploader.attachments[index].file.name,
+            { type: "image/jpeg" },
+          );
+          uploader.setAttachments((prev: Attachment[]) =>
+            prev.map((attachment, i) =>
+              i === index ? { ...attachment, file: newFile } : attachment,
+            ),
+          );
+        }
+        resolve();
+      }, "image/jpeg");
+    });
   }
 
+  useEffect(() => {
+    setCropperRefs(
+      uploader.attachments.map(() => createRef<ReactCropperElement>()),
+    );
+  }, [uploader.attachments]);
+
   return (
-    <div className="relative flex h-full w-full flex-col justify-center overflow-hidden">
-      <div className="left-0 top-[-36px] flex w-full items-center justify-between">
+    <div className="relative flex h-full w-full flex-col justify-center overflow-hidden pt-2">
+      <div className="z-100 relative top-[-4px] flex w-full items-center justify-between px-4">
         <Button
           variant="ghost"
-          onClick={() => {
-            uploader.reset();
-          }}
-          className="w-fit p-0 hover:bg-transparent"
+          onClick={handleLastStep}
+          className="h-[24px] w-[24px] bg-card p-0 text-card-foreground hover:bg-card-foreground hover:text-card"
         >
           <ArrowLeft size={24} />
-          <span className="text-sm">back</span>
         </Button>
-        {(showContinueButton || uploader.isUploading) && (
+        {currentStep === "crop" ? (
           <LoadingButton
             loading={uploader.isUploading}
-            onClick={handleContinue}
+            onClick={handleNextStep}
             variant="ghost"
-            className="w-fit p-0 hover:bg-transparent"
+            className="h-[24px] w-[24px] bg-card p-0 text-card-foreground hover:bg-card-foreground hover:text-card"
           >
-            <span className="text-sm">continue</span>
             <ArrowRight size={24} />
+          </LoadingButton>
+        ) : (
+          <LoadingButton
+            variant="outline"
+            loading={mutation.isPending}
+            onClick={onPostSubmit}
+            disabled={mutation.isPending || input.trim().length === 0}
+            className="h-[36px] w-[36px] rounded-full bg-card p-0 text-card-foreground hover:bg-card-foreground hover:text-card"
+          >
+            Post
           </LoadingButton>
         )}
       </div>
-      <div
-        className={`group relative flex h-[${width * aspectRatio}px] w-[${width}px] flex-col overflow-hidden`}
-      >
-        <div className={`relative flex h-[${width * aspectRatio}px] w-[${width}px] items-center`}>
-          {uploader.attachments.map((attachment, index) => (
-            <div key={index} className="inset-0 transition-opacity duration-300 ease-in-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'}">
-              <MemoCropper
-                src={URL.createObjectURL(attachment.file)}
-                cropperRef={cropperRef}
-              />
-            </div>
-          ))}
-          <Button onClick={() => setCurrentIndex((currentIndex - 1 + uploader.attachments.length) % uploader.attachments.length)} className="absolute left-0 top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50">Previous</Button>
-          <Button onClick={() => setCurrentIndex((currentIndex + 1) % uploader.attachments.length)} className="absolute right-0 top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50">Next</Button>
-          {/* {currentIndex > 0 && (
+      <div className="group relative flex h-full w-full overflow-hidden">
+        <div
+          className={`relative flex items-center overflow-hidden`}
+          style={{
+            height: `${width * aspectRatio}px`,
+            width: `${width}px`,
+            minWidth: `${width}px`,
+          }}
+        >
+          {uploader.attachments.map((attachment, index) =>
+            currentStep === "crop" ? (
+              <div
+                key={index}
+                className={`duration-600 absolute inset-0 transition-opacity ease-in-out ${index === currentIndex ? "opacity-100" : "opacity-0"}`}
+              >
+                <MemoCropper
+                  src={URL.createObjectURL(attachment.file)}
+                  cropperRef={cropperRefs[index]}
+                />
+              </div>
+            ) : (
+              <div
+                key={index}
+                className={`duration-600 absolute inset-0 transition-opacity ease-in-out ${index === currentIndex ? "opacity-100" : "opacity-0"}`}
+              >
+                <Image
+                  src={URL.createObjectURL(attachment.file)}
+                  alt=""
+                  width={9999}
+                  height={9999}
+                  className="object-cover"
+                />
+              </div>
+            ),
+          )}
+          {currentIndex > 0 && (
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                setCurrentIndex(
+                  (prev) => (prev - 1) % uploader.attachments.length,
+                );
+              }}
+              className="absolute left-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+            >
+              <ArrowLeft size={36} />
+            </Button>
+          )}
+          {currentIndex < uploader.attachments.length - 1 && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setCurrentIndex(
+                  (prev) => (prev + 1) % uploader.attachments.length,
+                );
+              }}
+              className="absolute right-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+            >
+              <ArrowRight size={36} />
+            </Button>
+          )}
+          {currentStep === "crop" && (
             <>
-              <MemoCropper
-                src={URL.createObjectURL(
-                  uploader.attachments[currentIndex - 1].file,
-                )}
-                cropperRef={cropperRef}
-              />
-              <Button
+              <AttachmentButton
+                onFileSelected={onFileSelected}
+                disabled={false}
+                className="absolute left-1/2 top-1/2 h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
                 variant="ghost"
+              >
+                <Plus size={36} />
+              </AttachmentButton>
+              <Button
                 onClick={() => {
-                  crop(currentIndex);
+                  uploader.removeAttachment(
+                    uploader.attachments[currentIndex].file.name,
+                  );
                   setCurrentIndex(
-                    (prev) => (prev - 1) % uploader.attachments.length,
+                    // attachments.length - 1 because we are removing an attachment, and due to async nature of react, it might not be ready yet
+                    (prev) => (prev - 1) % (uploader.attachments.length - 1),
                   );
                 }}
-                className="absolute left-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+                className="absolute left-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+                variant="ghost"
               >
-                <ArrowLeft size={36} />
+                <X size={24} />
+              </Button>
+              <Button
+                onClick={async () => {
+                  await crop(currentIndex);
+                }}
+                className="absolute right-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+                variant="ghost"
+              >
+                <Check size={24} />
               </Button>
             </>
           )}
-          <MemoCropper
-            src={URL.createObjectURL(uploader.attachments[currentIndex].file)}
-            cropperRef={cropperRef}
-          />
-          {currentIndex < uploader.attachments.length - 1 && (
-            <>
-              <MemoCropper
-                src={URL.createObjectURL(
-                  uploader.attachments[currentIndex + 1].file,
-                )}
-                cropperRef={cropperRef}
+          <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 items-center justify-center gap-1 bg-transparent opacity-0 group-hover:opacity-50">
+            {uploader.attachments.map((_, index) => (
+              <div
+                key={index}
+                className={`h-2 w-2 rounded-full ${
+                  index === currentIndex
+                    ? "bg-card-foreground"
+                    : "bg-card-foreground/30"
+                }`}
               />
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  crop(currentIndex);
-                  setCurrentIndex(
-                    (prev) => (prev + 1) % uploader.attachments.length,
-                  );
-                }}
-                className="absolute right-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
-              >
-                <ArrowRight size={36} />
-              </Button>
-            </>
-          )} */}
+            ))}
+          </div>
         </div>
-        <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 items-center justify-center gap-1 bg-transparent opacity-0 group-hover:opacity-50">
-          {uploader.attachments.map((_, index) => (
-            <div
-              key={index}
-              className={`h-2 w-2 rounded-full ${
-                index === currentIndex
-                  ? "bg-card-foreground"
-                  : "bg-card-foreground/30"
-              }`}
-            />
-          ))}
-        </div>
-        <AttachmentButton
-          onClick={() => {
-            crop(currentIndex);
-          }}
-          onFileSelected={onFileSelected}
-          disabled={false}
-          className="absolute left-1/2 top-1/2 h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
-          variant="ghost"
-        >
-          <Plus size={36} />
-        </AttachmentButton>
-        <Button
-          onClick={() => {
-            uploader.removeAttachment(
-              uploader.attachments[currentIndex].file.name,
-            );
-            setCurrentIndex(
-              // attachments.length - 1 because we are removing an attachment, and due to async nature of react, it might not be ready yet
-              (prev) => (prev - 1) % (uploader.attachments.length - 1),
-            );
-          }}
-          className="absolute right-[5%] top-[10%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
-          variant="ghost"
-        >
-          <X size={24} />
-        </Button>
+        {currentStep === "text" && (
+          <TextEditor
+            editor={editor}
+            size={{ width, height: width * aspectRatio }}
+          />
+        )}
       </div>
-      {textEditorOpen && (
-        <TextEditor
-          uploader={uploader}
-          size={{ width, height: width * aspectRatio }}
-        />
-      )}
     </div>
   );
 }
@@ -322,15 +418,18 @@ const MemoCropper = memo(
       },
       [width, aspectRatio],
     );
+
     return (
       <Cropper
         src={src}
         viewMode={1}
         dragMode="move"
-        aspectRatio={1}
-        initialAspectRatio={1}
+        aspectRatio={aspectRatio}
+        initialAspectRatio={aspectRatio}
         cropBoxMovable={false}
         cropBoxResizable={false}
+        zoomable={true}
+        scalable={true}
         minContainerWidth={width}
         minContainerHeight={width * aspectRatio}
         minCropBoxWidth={width}
@@ -340,13 +439,10 @@ const MemoCropper = memo(
         responsive={true}
         guides={true}
         center={true}
-        zoomable={true}
-        scalable={true}
         autoCropArea={1}
         checkOrientation={false}
         background={false}
         ready={onReady}
-        // className={`relative transition-opacity duration-1000 ease-in-out`}
         ref={cropperRef}
       />
     );
@@ -405,43 +501,20 @@ function AttachmentButton({
 }
 
 function TextEditor({
-  uploader,
+  editor,
   size,
 }: {
-  uploader: ReturnType<typeof useMediaUpload>;
+  editor: Editor | null;
   size: { width: number; height: number };
 }) {
   const { user } = useSession();
-  const mutation = useSubmitPostMutation();
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        bold: false,
-        italic: false,
-      }),
-      Placeholder.configure({
-        placeholder: "What's on your mind?",
-      }),
-    ],
-  });
-
-  const input = editor?.getText({ blockSeparator: "\n" }) || "";
-
-  const onSubmit = async () => {
-    // await startUpload(attachments.map((attachment) => attachment.file));
-    mutation.mutate({
-      content: input,
-      mediaIds: uploader.attachments
-        .map((attachment) => attachment.mediaId)
-        .filter(Boolean) as string[],
-    });
-    editor?.commands.clearContent();
-    uploader.reset();
-  };
 
   return (
-    <div className="h-full w-full space-y-4 border-2 border-border bg-card p-4 text-card-foreground outline-2">
-      <div className="flex w-full">
+    <div
+      className="relative w-full space-y-4 border-2 border-border bg-card p-4 text-card-foreground outline-2"
+      style={{ height: size.height, maxHeight: size.height }}
+    >
+      <div className="flex h-full w-full flex-col">
         <div className="flex items-center">
           <UserAvatar
             avatarUrl={user.avatarUrl}
@@ -450,20 +523,9 @@ function TextEditor({
         </div>
         <EditorContent
           editor={editor}
-          className="h-full w-full overflow-y-auto rounded-md bg-background p-4"
+          className={`h-full max-h-full w-full overflow-y-auto rounded-md bg-transparent p-4`}
         />
       </div>
-      {/* <div className="mt-2 flex w-full items-center justify-end">
-        <LoadingButton
-          variant="outline"
-          loading={mutation.isPending || uploader.isUploading}
-          onClick={onSubmit}
-          size="sm"
-          disabled={input.trim().length === 0 || uploader.isUploading}
-        >
-          Post
-        </LoadingButton>
-      </div> */}
     </div>
   );
 }

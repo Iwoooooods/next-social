@@ -16,32 +16,19 @@ export default function useMediaUpload() {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const { isUploading, startUpload } = useUploadThing("attachment", {
-
-    onBeforeUploadBegin(files) {
-      const renameFiles = files.map((file) => {
-        const extension = file.name.split(".").pop();
-        return new File(
-          [file],
-          `attachment_${crypto.randomUUID()}.${extension}`,
-          {
-            type: file.type,
-          },
-        );
-      });
-
-      setAttachments((prev) => [
-        ...prev,
-        ...renameFiles.map((file) => ({ file, isUploading: true })),
-      ]);
-
-      return renameFiles;
-    },
+    // onBeforeUploadBegin(files) {
+    //   setAttachments((prev: Attachment[]) => [
+    //     ...prev,
+    //     ...files.map((file) => ({ file, isUploading: true })),
+    //   ]);
+    //   return files;
+    // },
 
     onUploadProgress: setUploadProgress,
 
     onClientUploadComplete(res) {
-      setAttachments((prev) =>
-        prev.map((attachment, index) => {
+      setAttachments((prev: Attachment[]) =>
+        prev.map((attachment) => {
           const uploadResult = res.find((r) => r.name === attachment.file.name);
           if (!uploadResult) return attachment;
 

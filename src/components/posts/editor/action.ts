@@ -28,10 +28,10 @@ export async function submitPost(input: {
     },
     include: getPostDataInclude(user.id),
   });
-
+  
   return newPost;
 }
 
-export async function deleteAttachment(fileName: string) {
-  await new UTApi().deleteFiles(fileName);
+export async function deleteAttachment(keys: string | string[]) {
+  await new UTApi().deleteFiles(keys);
 }

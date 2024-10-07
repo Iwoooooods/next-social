@@ -68,7 +68,7 @@ export default function useMediaUpload() {
     },
   });
 
-  function handleStartUpload(files: File[]) {
+  async function handleStartUpload(files: File[]) {
     if (isUploading) {
       toast({
         title: "Uploading",
@@ -77,7 +77,7 @@ export default function useMediaUpload() {
       return;
     }
 
-    if (files.length + attachments.length > 5) {
+    if (attachments.length > 5) {
       toast({
         title: "Maximum number of attachments reached",
         description: "You can only upload a maximum of 5 attachments",
@@ -86,7 +86,7 @@ export default function useMediaUpload() {
       return;
     }
 
-    startUpload(files);
+    await startUpload(files);
   }
 
    function removeAttachment(fileName: string) {
@@ -107,5 +107,6 @@ export default function useMediaUpload() {
     removeAttachment,
     reset,
     isUploading,
+    setAttachments,
   };
 }

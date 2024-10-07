@@ -10,8 +10,7 @@ import React from "react";
 import { useSubmitPostMutation } from "./mutation";
 import "./styles.css";
 import LoadingButton from "@/components/LoadingButton";
-import useMediaUpload from "@/hooks/useMediaUpload";
-import { Attachment } from "@/hooks/useMediaUpload";
+import useMediaUpload, { Attachment } from "@/hooks/useMediaUpload";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -70,6 +69,14 @@ export const PostEditor = React.memo(() => {
     await deleteAttachment(urlFileName);
   };
 
+  const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    const files = Array.from(event.clipboardData.items)
+    .filter(item => item.kind === "file")
+    .map((item) => item.getAsFile()) as File[];
+    startUpload(files);
+    // console.log(files);
+  };
+
   return (
     <div className="w-full space-y-4 rounded-xl border-2 border-border bg-card p-4 text-card-foreground outline-2">
       <div className="flex w-full">
@@ -81,14 +88,14 @@ export const PostEditor = React.memo(() => {
         </div>
         <EditorContent
           editor={editor}
+          onPaste={handlePaste}
           className="max-h-32 w-full overflow-y-auto rounded-md bg-background p-4"
         />
       </div>
       {attachments.length > 0 && (
-        <div className={cn("flex gap-2 p-2")}>
+        <div className={cn("flex gap-2 p-2 flex-wrap")}>
           {attachments.map((attachment: Attachment) => (
             <AttachmentPreview
-              key={attachment.file.name}
               attachment={attachment}
               removeAttachment={handleRemoveAttachment}
             />
@@ -112,25 +119,25 @@ export const PostEditor = React.memo(() => {
 });
 
 const AttachmentPreview = ({
-  key,
   attachment,
   removeAttachment,
 }: {
-  key: string;
   attachment: Attachment;
   removeAttachment: (fileName: string, url?: string) => void;
 }) => {
   const src = URL.createObjectURL(attachment.file);
   return (
-    <div className="relative w-fit" key={key}>
+    <div className="relative w-fit">
       {attachment.file.type.startsWith("image") ? (
-        <Image
-          src={src}
-          alt="Attachment"
-          width={100}
-          height={100}
-          className={cn("relative", attachment.isUploading && "opacity-50")}
-        />
+        <div className="w-36 h-36 overflow-hidden relative">
+          <Image
+            src={src}
+            alt="Attachment"
+            width={9999}
+            height={9999}
+            className={cn("absolute w-full h-full object-cover", attachment.isUploading && "opacity-50")}
+          />
+        </div>
       ) : (
         <video controls className="h-full w-full">
           <source src={src} type={attachment.file.type} />

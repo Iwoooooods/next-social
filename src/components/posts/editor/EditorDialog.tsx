@@ -66,7 +66,7 @@ export default function EditorDialog() {
         className={`flex flex-col items-center gap-2 overflow-hidden border-none bg-card p-0 text-card-foreground ${
           mediaUploader.attachments.length > 0 &&
           currentStep === "text" &&
-          "max-w-[960px]"
+          "max-w-[896px]"
         }`}
       >
         <DialogHeader className="px-4 py-2">
@@ -264,9 +264,9 @@ function MediaPreview({
           </LoadingButton>
         )}
       </div>
-      <div className="group relative flex h-full w-full overflow-hidden">
+      <div className="relative flex h-full w-full overflow-hidden">
         <div
-          className={`relative flex items-center overflow-hidden`}
+          className={`group relative flex items-center overflow-hidden`}
           style={{
             height: `${width * aspectRatio}px`,
             width: `${width}px`,
@@ -307,7 +307,7 @@ function MediaPreview({
                   (prev) => (prev - 1) % uploader.attachments.length,
                 );
               }}
-              className="absolute left-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+              className="absolute left-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
             >
               <ArrowLeft size={36} />
             </Button>
@@ -320,7 +320,7 @@ function MediaPreview({
                   (prev) => (prev + 1) % uploader.attachments.length,
                 );
               }}
-              className="absolute right-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+              className="absolute right-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
             >
               <ArrowRight size={36} />
             </Button>
@@ -330,7 +330,7 @@ function MediaPreview({
               <AttachmentButton
                 onFileSelected={onFileSelected}
                 disabled={false}
-                className="absolute left-1/2 top-1/2 h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+                className="absolute left-1/2 top-1/2 h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
                 variant="ghost"
               >
                 <Plus size={36} />
@@ -345,7 +345,7 @@ function MediaPreview({
                     (prev) => (prev - 1) % (uploader.attachments.length - 1),
                   );
                 }}
-                className="absolute left-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+                className="absolute left-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
                 variant="ghost"
               >
                 <X size={24} />
@@ -354,14 +354,14 @@ function MediaPreview({
                 onClick={async () => {
                   await crop(currentIndex);
                 }}
-                className="absolute right-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+                className="absolute right-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
                 variant="ghost"
               >
                 <Check size={24} />
               </Button>
             </>
           )}
-          <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 items-center justify-center gap-1 bg-transparent opacity-0 group-hover:opacity-50">
+          <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 items-center justify-center gap-1 bg-transparent opacity-0 group-hover:opacity-100">
             {uploader.attachments.map((_, index) => (
               <div
                 key={index}
@@ -511,7 +511,7 @@ function TextEditor({
 
   return (
     <div
-      className="relative w-full space-y-4 border-2 border-border bg-card p-4 text-card-foreground outline-2"
+      className="relative w-full max-w-sm space-y-4 border-2 border-border bg-card p-4 text-card-foreground outline-2"
       style={{ height: size.height, maxHeight: size.height }}
     >
       <div className="flex h-full w-full flex-col">

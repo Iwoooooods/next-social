@@ -15,9 +15,9 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 
 export const Post = ({ postProps }: { postProps: PostData }) => {
   return (
-    <article className="group w-full rounded-xl border-2 border-border bg-card p-4 text-card-foreground outline-2">
-      <div className="flex flex-col items-start gap-2">
-        <div className="flex w-full items-center justify-start gap-4">
+    <article className="group w-full overflow-hidden rounded-xl border-2 border-border bg-card pt-4 text-card-foreground outline-2">
+      <div className="flex flex-col items-center justify-between gap-2">
+        <div className="flex w-full items-center justify-start gap-4 px-4">
           <UserTooltip user={postProps.user}>
             <Link href={`/users/${postProps.user.username}`}>
               <UserAvatar avatarUrl={postProps.user.avatarUrl} />
@@ -51,25 +51,24 @@ const DetailDialog = ({ postProps }: { postProps: PostData }) => {
   }
   return (
     <Dialog>
-      <DialogTrigger className="flex w-full flex-col items-center justify-center gap-2">
+      <DialogTrigger className="flex w-full flex-col items-center justify-center">
         <div className="group relative aspect-auto h-72 w-full overflow-hidden">
           <Image
             src={postProps.attachments[0].url}
             alt="media"
-            width={9999}
-            height={9999}
-            className="absolute h-full w-full object-cover"
+            fill
+            objectFit="cover"
           />
         </div>
-        <div className="flex w-full flex-wrap gap-2">
+        {/* <div className="flex w-full flex-wrap gap-2">
           {extractTags(postProps.content, /#(\w+)/g).map((tag, index) => (
             <span key={index} className="text-primary">
             {tag}
             </span>
           ))}
-        </div>
+        </div> */}
       </DialogTrigger>
-      <DialogContent className="h-[92vh] max-w-[80vw] border-none bg-transparent p-0">
+      <DialogContent className="max-w-[80vw] border-none bg-transparent p-0">
         <PostDetail postProps={postProps} />
       </DialogContent>
     </Dialog>
@@ -79,14 +78,16 @@ const DetailDialog = ({ postProps }: { postProps: PostData }) => {
 const PostDetail = ({ postProps }: { postProps: PostData }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div className="group relative flex aspect-auto h-full w-full flex-1 flex-col overflow-hidden bg-card">
-        <Image
-          src={postProps.attachments[currentIndex].url}
-          alt="media"
-          fill
-          className="absolute object-contain"
-        />
+    <div className="flex items-center justify-center">
+      <div className="group relative flex aspect-auto h-[512px] w-[512px] flex-1 flex-col overflow-hidden bg-card">
+        <div className="relative h-full w-full">
+          <Image
+            src={postProps.attachments[currentIndex].url}
+            alt="media"
+            fill
+            objectFit="cover"
+          />
+        </div>
         {currentIndex > 0 && (
           <Button
             variant="ghost"
@@ -95,7 +96,7 @@ const PostDetail = ({ postProps }: { postProps: PostData }) => {
                 (prev) => (prev - 1) % postProps.attachments.length,
               )
             }
-            className="absolute left-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+            className="absolute left-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
           >
             <ArrowLeft size={36} />
           </Button>
@@ -108,13 +109,13 @@ const PostDetail = ({ postProps }: { postProps: PostData }) => {
                 (prev) => (prev + 1) % postProps.attachments.length,
               )
             }
-            className="absolute right-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-50"
+            className="absolute right-[2%] top-1/2 h-fit w-fit -translate-y-1/2 rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
           >
             <ArrowRight size={36} />
           </Button>
         )}
-        <div className="mb-4 mt-auto flex w-full items-center justify-center gap-1 bg-transparent opacity-0 group-hover:opacity-50">
-          {postProps.attachments.map((attachment, index) => (
+        <div className="absolute bottom-4 left-1/2 flex w-full -translate-x-1/2 items-center justify-center gap-1 bg-transparent opacity-0 group-hover:opacity-100">
+          {postProps.attachments.map((_, index) => (
             <div
               key={index}
               className={`h-2 w-2 rounded-full ${
@@ -126,7 +127,7 @@ const PostDetail = ({ postProps }: { postProps: PostData }) => {
           ))}
         </div>
       </div>
-      <div className="flex h-full w-full flex-1 flex-col gap-2 bg-card p-4 text-card-foreground">
+      <div className="flex h-full w-full max-w-md flex-1 flex-col gap-2 bg-card p-4 text-card-foreground">
         <div className="flex w-full items-center justify-start gap-4">
           <UserTooltip user={postProps.user}>
             <Link href={`/users/${postProps.user.username}`}>

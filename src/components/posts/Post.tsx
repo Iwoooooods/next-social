@@ -12,8 +12,13 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { ArrowRight, ArrowLeft } from "lucide-react";
+import LikeButton from "./LikeButton";
+import CollectButton from "./CollectionButton";
+import CommentInput from "@/components/comments/CommentInput";
+import Comments from "@/components/comments/Comments";
 
 export const Post = ({ postProps }: { postProps: PostData }) => {
+  
   return (
     <article className="group w-full overflow-hidden rounded-xl border-2 border-border bg-card pt-4 text-card-foreground outline-2">
       <div className="flex flex-col items-center justify-between gap-2">
@@ -68,7 +73,7 @@ const DetailDialog = ({ postProps }: { postProps: PostData }) => {
           ))}
         </div> */}
       </DialogTrigger>
-      <DialogContent className="max-w-[80vw] border-none bg-transparent p-0">
+      <DialogContent className="max-w-[896px] border-none bg-transparent p-0">
         <PostDetail postProps={postProps} />
       </DialogContent>
     </Dialog>
@@ -79,7 +84,7 @@ const PostDetail = ({ postProps }: { postProps: PostData }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   return (
     <div className="flex items-center justify-center">
-      <div className="group relative flex aspect-auto h-[512px] w-[512px] flex-1 flex-col overflow-hidden bg-card">
+      <div className="group relative flex aspect-auto h-[512px] w-[512px] flex-col overflow-hidden bg-card">
         <div className="relative h-full w-full">
           <Image
             src={postProps.attachments[currentIndex].url}
@@ -127,31 +132,56 @@ const PostDetail = ({ postProps }: { postProps: PostData }) => {
           ))}
         </div>
       </div>
-      <div className="flex h-full w-full max-w-md flex-1 flex-col gap-2 bg-card p-4 text-card-foreground">
-        <div className="flex w-full items-center justify-start gap-4">
-          <UserTooltip user={postProps.user}>
-            <Link href={`/users/${postProps.user.username}`}>
-              <UserAvatar avatarUrl={postProps.user.avatarUrl} />
-            </Link>
-          </UserTooltip>
-          <div className="flex flex-col">
-            <Link href={`/users/${postProps.user.username}`}>
-              <span className="font-bold">{postProps.user.username}</span>
-            </Link>
-            <span className="text-gray-500">
-              {formatDate(postProps.createdAt)}
-            </span>
+      <div className="relative hidden md:flex h-[512px] w-full max-w-sm flex-col gap-2 bg-card p-4 text-card-foreground">
+        <div className="flex flex-col overflow-y-scroll no-scrollbar max-h-[calc(100%-110px)]">
+          <div className="flex w-full items-center justify-start gap-4">
+            <UserTooltip user={postProps.user}>
+              <Link href={`/users/${postProps.user.username}`}>
+                <UserAvatar avatarUrl={postProps.user.avatarUrl} />
+              </Link>
+            </UserTooltip>
+            <div className="flex flex-col">
+              <Link href={`/users/${postProps.user.username}`}>
+                <span className="font-bold">{postProps.user.username}</span>
+              </Link>
+              <span className="text-gray-500">
+                {formatDate(postProps.createdAt)}
+              </span>
+            </div>
+            {/* <PostMoreButton className="ml-auto mr-4 flex" post={postProps} /> */}
           </div>
-          <PostMoreButton
-            className="ml-auto flex opacity-0 group-hover:opacity-100"
-            post={postProps}
-          />
+          <Linkify>
+            <p className="w-full whitespace-pre-line break-words text-start">
+              {postProps.content}
+            </p>
+          </Linkify>
+          <hr className="w-full py-2" />
+          <Comments post={postProps} />
         </div>
-        <Linkify>
-          <p className="w-full whitespace-pre-line break-words p-2 text-start">
-            {postProps.content}
-          </p>
-        </Linkify>
+        <div className="absolute bottom-0 left-0 flex max-h-36 w-full flex-col gap-1 p-2">
+          <div className="flex items-start justify-start gap-2 px-2">
+            <LikeButton
+              postId={postProps.id}
+              initialState={{
+                likes: postProps._count.likes,
+                isLikedByUser: postProps.likes.some(
+                  (like) => like.userId === postProps.user.id,
+                ),
+              }}
+              className="h-[36px] w-[36px] rounded-full p-0"
+            />
+            <CollectButton
+              postId={postProps.id}
+              initialState={{
+                isCollectedByUser: postProps.collections.some(
+                  (collection) => collection.userId === postProps.user.id,
+                ),
+              }}
+              className="h-[36px] w-[36px] rounded-full p-0"
+            />
+          </div>
+          <CommentInput post={postProps} />
+        </div>
       </div>
     </div>
   );

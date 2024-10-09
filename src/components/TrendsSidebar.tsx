@@ -41,7 +41,7 @@ const WhoToFollow = async () => {
   });
 
   return (
-    <div className="flex w-full flex-col items-start justify-start gap-4">
+    <div className="flex w-full flex-col items-start justify-start gap-4 mt">
       <h1 className="text-lg font-bold">Who to follow</h1>
       {userToFollow.map((user) => (
         <div

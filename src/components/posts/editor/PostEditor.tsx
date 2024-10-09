@@ -45,7 +45,6 @@ export const PostEditor = React.memo(() => {
   const input = editor?.getText({ blockSeparator: "\n" }) || "";
 
   const onSubmit = async () => {
-    console.log("onSubmit", attachments);
     mutation.mutate(
       {
         content: input,

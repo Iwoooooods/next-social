@@ -6,6 +6,11 @@ import { validateRequest } from "@/auth";
 import UnauthorizedMessage from "@/components/UnauthorizedMessage";
 import UserProfile from "./UserProfile";
 import UserPosts from "./UserPosts";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Profile",
+};
 
 const getUser = cache(async (username: string, loggedInUserId: string) => {
     const user = await prisma.user.findFirst({

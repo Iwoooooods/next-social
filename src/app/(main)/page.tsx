@@ -9,7 +9,7 @@ export default async function Home() {
   return (
     <div className="flex h-full w-full gap-4">
       <div className="h-full w-full flex flex-col items-center justify-start py-4 gap-4">
-        <PostEditor />
+        {/* <PostEditor /> */}
         <Tabs defaultValue="for-you" className="w-full">
           <TabsList>
             <TabsTrigger value="for-you">For You</TabsTrigger>

@@ -36,10 +36,10 @@ export const MenuBar = ({ className }: { className?: string }) => {
           <span className="ml-2 hidden lg:inline">Messages</span>
         </Link>
       </Button>
-      <Button variant="ghost" title="Bookmarks" asChild>
-        <Link href="/bookmarks">
+      <Button variant="ghost" title="Collects" asChild>
+        <Link href="/collects">
           <BookmarkIcon className="h-6 w-6" />
-          <span className="ml-2 hidden lg:inline">Bookmarks</span>
+          <span className="ml-2 hidden lg:inline">Collects</span>
         </Link>
       </Button>
       <EditorDialog />

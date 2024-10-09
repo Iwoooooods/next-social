@@ -41,3 +41,8 @@ export function verify(password: string, hashedPassword: string) {
   const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
   return storedHash === hash;
 }
+
+
+export const createCommentSchema = z.object({
+  content: requiredString,
+});

@@ -1,15 +1,22 @@
 "use client";
 
-import { Dialog, DialogClose, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { SquarePen, ArrowLeft, ArrowRight, X, Plus, Check } from "lucide-react";
+import {
+  SquarePen,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Scissors,
+  Trash,
+} from "lucide-react";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import useMediaUpload, { Attachment } from "@/hooks/useMediaUpload";
-import { useEffect, useRef, useCallback, createRef } from "react";
+import { useEffect, useRef, createRef } from "react";
 import LoadingButton from "@/components/LoadingButton";
 import Image from "next/image";
 import { useState } from "react";
@@ -27,11 +34,16 @@ import { useSubmitPostMutation } from "./mutation";
 import { Dispatch, SetStateAction, memo, RefObject } from "react";
 import { deleteAttachment } from "./action";
 import "./styles.css";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const imageWidth = 512;
+const textEditorWidth = 384;
 
 export default function EditorDialog() {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<"crop" | "text">("crop");
   const mediaUploader = useMediaUpload();
+  const [aspectRatio, setAspectRatio] = useState<number>(1);
 
   const onFileSelected = (files: File[]) => {
     mediaUploader.setAttachments((prev) => [
@@ -48,11 +60,19 @@ export default function EditorDialog() {
   return (
     <Dialog
       open={open}
-      onOpenChange={(open) => {
+      onOpenChange={async (open) => {
         setOpen(open);
         if (!open) {
           mediaUploader.reset();
           setCurrentStep("crop");
+          await deleteAttachment(
+            mediaUploader.attachments
+              .map((attachment) => {
+                const fileName = attachment.url?.split("https://utfs.io/f/")[1];
+                return fileName;
+              })
+              .filter(Boolean) as string[],
+          );
         }
       }}
     >
@@ -63,11 +83,13 @@ export default function EditorDialog() {
         </span>
       </DialogTrigger>
       <DialogContent
-        className={`flex flex-col items-center gap-2 overflow-hidden border-none bg-card p-0 text-card-foreground ${
-          mediaUploader.attachments.length > 0 &&
-          currentStep === "text" &&
-          "max-w-[896px]"
-        }`}
+        className="flex flex-col items-center gap-2 overflow-hidden border-none bg-card p-0 text-card-foreground"
+        style={{
+          maxWidth:
+            mediaUploader.attachments.length > 0 && currentStep === "text"
+              ? `${imageWidth + textEditorWidth}px`
+              : imageWidth,
+        }}
       >
         <DialogHeader className="px-4 py-2">
           <DialogTitle className="text-center">Create a new post</DialogTitle>
@@ -84,6 +106,8 @@ export default function EditorDialog() {
             onFileSelected={onFileSelected}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            aspectRatio={aspectRatio}
+            setAspectRatio={setAspectRatio}
           />
         )}
       </DialogContent>
@@ -129,16 +153,24 @@ function MediaPreview({
   currentStep,
   setCurrentStep,
   setOpen,
+  aspectRatio,
+  setAspectRatio,
 }: {
   uploader: ReturnType<typeof useMediaUpload>;
   onFileSelected: (files: File[]) => void;
   currentStep: "crop" | "text";
   setCurrentStep: Dispatch<SetStateAction<"crop" | "text">>;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  aspectRatio: number;
+  setAspectRatio: Dispatch<SetStateAction<number>>;
 }) {
-  const width = 512;
+  const width = imageWidth;
   const mutation = useSubmitPostMutation();
-  const [aspectRatio, setAspectRatio] = useState<number>(1);
+  const aspectRatioOptions = [
+    { label: "1:1", value: 1 },
+    // { label: "16:9", value: 9 / 16 },
+    { label: "3:4", value: 3 / 4 },
+  ];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cropperRefs, setCropperRefs] = useState<
     RefObject<ReactCropperElement>[]
@@ -165,11 +197,14 @@ function MediaPreview({
         mediaIds: uploader.attachments
           .map((attachment) => attachment.mediaId)
           .filter(Boolean) as string[],
+        mediaRatio: aspectRatio,
       },
       {
         onSuccess: () => {
           editor?.commands.clearContent();
           uploader.reset();
+          setAspectRatio(1);
+          setCurrentStep("crop");
           setOpen(false);
         },
       },
@@ -184,7 +219,6 @@ function MediaPreview({
         uploader.attachments
           .map((attachment) => {
             const fileName = attachment.url?.split("https://utfs.io/f/")[1];
-            console.log(fileName);
             return fileName;
           })
           .filter(Boolean) as string[],
@@ -218,7 +252,9 @@ function MediaPreview({
           );
           uploader.setAttachments((prev: Attachment[]) =>
             prev.map((attachment, i) =>
-              i === index ? { ...attachment, file: newFile } : attachment,
+              i === index
+                ? { ...attachment, file: newFile, isCropped: true }
+                : attachment,
             ),
           );
         }
@@ -226,6 +262,28 @@ function MediaPreview({
       }, "image/jpeg");
     });
   }
+
+  const handleAspectRatioChange = (newRatio: string) => {
+    if (uploader.attachments.length > 1) {
+      // Don't allow changing aspect ratio if there's more than one image
+      return;
+    }
+    const ratio = parseFloat(newRatio);
+    setAspectRatio(ratio);
+    // Recrop all images with the new aspect ratio
+    cropperRefs.forEach((ref) => {
+      const cropper = ref.current?.cropper;
+      if (cropper) {
+        cropper.setAspectRatio(ratio);
+        cropper.setCropBoxData({
+          left: 0,
+          top: 0,
+          width: width,
+          height: width / ratio,
+        });
+      }
+    });
+  };
 
   useEffect(() => {
     setCropperRefs(
@@ -245,6 +303,9 @@ function MediaPreview({
         </Button>
         {currentStep === "crop" ? (
           <LoadingButton
+            disabled={uploader.attachments.some(
+              (attachment) => !attachment.isCropped,
+            )}
             loading={uploader.isUploading}
             onClick={handleNextStep}
             variant="ghost"
@@ -264,13 +325,31 @@ function MediaPreview({
           </LoadingButton>
         )}
       </div>
+      {currentStep === "crop" && (
+        <Tabs
+          value={aspectRatio.toString()}
+          onValueChange={handleAspectRatioChange}
+          className="mb-4"
+        >
+          <TabsList className="flex flex-wrap gap-2">
+            {aspectRatioOptions.map((option) => (
+              <TabsTrigger
+                key={option.label}
+                value={option.value.toString()}
+                disabled={uploader.attachments.length > 1}
+              >
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      )}
       <div className="relative flex h-full w-full overflow-hidden">
         <div
-          className={`group relative flex items-center overflow-hidden`}
+          className="group relative flex items-center justify-center overflow-hidden"
           style={{
-            height: `${width * aspectRatio}px`,
             width: `${width}px`,
-            minWidth: `${width}px`,
+            height: `${width / aspectRatio}px`,
           }}
         >
           {uploader.attachments.map((attachment, index) =>
@@ -282,6 +361,7 @@ function MediaPreview({
                 <MemoCropper
                   src={URL.createObjectURL(attachment.file)}
                   cropperRef={cropperRefs[index]}
+                  aspectRatio={aspectRatio}
                 />
               </div>
             ) : (
@@ -345,19 +425,19 @@ function MediaPreview({
                     (prev) => (prev - 1) % (uploader.attachments.length - 1),
                   );
                 }}
-                className="absolute left-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
+                className="absolute left-[5%] top-[5%] h-fit w-fit rounded-full bg-transparent p-0 opacity-0 hover:bg-transparent group-hover:opacity-100"
                 variant="ghost"
               >
-                <X size={24} />
+                <Trash size={24} />
               </Button>
               <Button
                 onClick={async () => {
                   await crop(currentIndex);
                 }}
-                className="absolute right-[5%] top-[5%] h-fit w-fit rounded-full bg-white/50 p-0 opacity-0 group-hover:opacity-100"
+                className="absolute right-[5%] top-[5%] h-fit w-fit rounded-full bg-transparent p-0 opacity-0 hover:bg-transparent group-hover:opacity-100"
                 variant="ghost"
               >
-                <Check size={24} />
+                <Scissors size={24} />
               </Button>
             </>
           )}
@@ -377,7 +457,7 @@ function MediaPreview({
         {currentStep === "text" && (
           <TextEditor
             editor={editor}
-            size={{ width, height: width * aspectRatio }}
+            size={{ width, height: width / aspectRatio }}
           />
         )}
       </div>
@@ -389,60 +469,32 @@ const MemoCropper = memo(
   ({
     src,
     cropperRef,
+    aspectRatio,
   }: {
     src: string;
     cropperRef: RefObject<ReactCropperElement>;
+    aspectRatio: number;
   }) => {
-    const aspectRatio = 1;
     const width = 512;
-    const onReady = useCallback(
-      (event: Cropper.ReadyEvent<HTMLImageElement>) => {
-        const cropper = event.currentTarget.cropper;
-        const imageData = cropper.getImageData();
-        const containerData = cropper.getContainerData();
-        const zoom = Math.max(
-          containerData.width / imageData.naturalWidth,
-          containerData.height / imageData.naturalHeight,
-        );
-        cropper.zoomTo(zoom);
-        cropper.setCropBoxData({
-          left: 0,
-          top: 0,
-          width: width,
-          height: width * aspectRatio,
-        });
-        cropper.setCanvasData({
-          width: width,
-          height: width * aspectRatio,
-        });
-      },
-      [width, aspectRatio],
-    );
+    const height = width / aspectRatio;
 
     return (
       <Cropper
         src={src}
+        style={{ height: "100%", width: "100%" }}
+        aspectRatio={aspectRatio}
         viewMode={1}
         dragMode="move"
-        aspectRatio={aspectRatio}
-        initialAspectRatio={aspectRatio}
+        background={false}
         cropBoxMovable={false}
         cropBoxResizable={false}
-        zoomable={true}
-        scalable={true}
-        minContainerWidth={width}
-        minContainerHeight={width * aspectRatio}
-        minCropBoxWidth={width}
-        minCropBoxHeight={width * aspectRatio}
-        minCanvasWidth={width}
-        minCanvasHeight={width * aspectRatio}
-        responsive={true}
-        guides={true}
-        center={true}
+        toggleDragModeOnDblclick={false}
         autoCropArea={1}
-        checkOrientation={false}
-        background={false}
-        ready={onReady}
+        responsive={true}
+        guides={false}
+        center={true}
+        minCropBoxWidth={width}
+        minCropBoxHeight={height}
         ref={cropperRef}
       />
     );

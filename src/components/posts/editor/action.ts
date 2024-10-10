@@ -9,6 +9,7 @@ import { UTApi } from "uploadthing/server";
 export async function submitPost(input: {
   content: string;
   mediaIds: string[];
+  mediaRatio: number;
 }) {
   const { user } = await validateRequest();
 
@@ -25,6 +26,7 @@ export async function submitPost(input: {
       attachments: {
         connect: mediaIds.map((id) => ({ id })),
       },
+      mediaRatio: input.mediaRatio,
     },
     include: getPostDataInclude(user.id),
   });

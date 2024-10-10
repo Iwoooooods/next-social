@@ -9,7 +9,7 @@ export default function Comment({ comment }: { comment: CommentData }) {
   return (
     <div className="relative group flex flex-col w-full">
       <CommentMoreButton comment={comment} className="absolute top-0 right-0 group-hover:visible invisible"/>
-      <div className="flex w-full items-center justify-start gap-4 px-4">
+      <div className="flex w-full items-center justify-start gap-4">
         <UserTooltip user={comment.user}>
           <Link href={`/users/${comment.user.username}`}>
             <UserAvatar avatarUrl={comment.user.avatarUrl} />

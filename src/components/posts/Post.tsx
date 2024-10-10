@@ -10,15 +10,25 @@ import Linkify from "../Linkify";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTrigger,
+} from "../ui/dialog";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import LikeButton from "./LikeButton";
 import CollectButton from "./CollectionButton";
 import CommentInput from "@/components/comments/CommentInput";
 import Comments from "@/components/comments/Comments";
+import { AspectRatio } from "../ui/aspect-ratio";
+import { DialogHeader, DialogTitle } from "../ui/dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+
+const imageWidth = 512;
+const textWidth = 384;
 
 export const Post = ({ postProps }: { postProps: PostData }) => {
-  
   return (
     <article className="group w-full overflow-hidden rounded-xl border-2 border-border bg-card pt-4 text-card-foreground outline-2">
       <div className="flex flex-col items-center justify-between gap-2">
@@ -50,10 +60,10 @@ export const Post = ({ postProps }: { postProps: PostData }) => {
 };
 
 const DetailDialog = ({ postProps }: { postProps: PostData }) => {
-  function extractTags(content: string, regex: RegExp) {
-    const matches = content.match(regex) || [];
-    return matches;
-  }
+  // function extractTags(content: string, regex: RegExp) {
+  //   const matches = content.match(regex) || [];
+  //   return matches;
+  // }
   return (
     <Dialog>
       <DialogTrigger className="flex w-full flex-col items-center justify-center">
@@ -62,6 +72,7 @@ const DetailDialog = ({ postProps }: { postProps: PostData }) => {
             src={postProps.attachments[0].url}
             alt="media"
             fill
+            // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             objectFit="cover"
           />
         </div>
@@ -73,7 +84,18 @@ const DetailDialog = ({ postProps }: { postProps: PostData }) => {
           ))}
         </div> */}
       </DialogTrigger>
-      <DialogContent className="max-w-[896px] border-none bg-transparent p-0">
+      <DialogContent
+        className={`border-none bg-card p-0 text-card-foreground`}
+        style={{ maxWidth: `${imageWidth + textWidth}px` }}
+      >
+        <VisuallyHidden.Root>
+          <DialogHeader>
+            <DialogTitle>Profile</DialogTitle>
+        </DialogHeader>
+          <DialogDescription>
+            See what's happening in the world right now
+          </DialogDescription>
+        </VisuallyHidden.Root>
         <PostDetail postProps={postProps} />
       </DialogContent>
     </Dialog>
@@ -84,15 +106,21 @@ const PostDetail = ({ postProps }: { postProps: PostData }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   return (
     <div className="flex items-center justify-center">
-      <div className="group relative flex aspect-auto h-[512px] w-[512px] flex-col overflow-hidden bg-card">
-        <div className="relative h-full w-full">
+      <div
+        className={`group relative flex flex-col overflow-hidden bg-card`}
+        style={{ width: `${imageWidth}px` }}
+      >
+        <AspectRatio
+          ratio={postProps.mediaRatio ?? 1}
+          className="relative h-full w-full"
+        >
           <Image
             src={postProps.attachments[currentIndex].url}
             alt="media"
             fill
             objectFit="cover"
           />
-        </div>
+        </AspectRatio>
         {currentIndex > 0 && (
           <Button
             variant="ghost"
@@ -132,8 +160,14 @@ const PostDetail = ({ postProps }: { postProps: PostData }) => {
           ))}
         </div>
       </div>
-      <div className="relative hidden md:flex h-[512px] w-full max-w-sm flex-col gap-2 bg-card p-4 text-card-foreground">
-        <div className="flex flex-col overflow-y-scroll no-scrollbar max-h-[calc(100%-110px)]">
+      <div
+        className={`relative hidden max-w-sm flex-col gap-2 bg-card p-4 text-card-foreground md:flex`}
+        style={{
+          width: `${textWidth}px`,
+          height: `${imageWidth / (postProps.mediaRatio ?? 1)}px`,
+        }}
+      >
+        <div className="no-scrollbar flex max-h-[calc(100%-110px)] flex-col overflow-y-scroll">
           <div className="flex w-full items-center justify-start gap-4">
             <UserTooltip user={postProps.user}>
               <Link href={`/users/${postProps.user.username}`}>

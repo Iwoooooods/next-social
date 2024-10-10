@@ -51,6 +51,7 @@ export const PostEditor = React.memo(() => {
         mediaIds: attachments
           .map((attachment) => attachment.mediaId)
           .filter(Boolean) as string[],
+        mediaRatio: 1,
       },
       {
         onSuccess: () => {
@@ -73,7 +74,6 @@ export const PostEditor = React.memo(() => {
     .filter(item => item.kind === "file")
     .map((item) => item.getAsFile()) as File[];
     startUpload(files);
-    // console.log(files);
   };
 
   return (

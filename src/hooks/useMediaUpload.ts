@@ -7,6 +7,7 @@ export interface Attachment {
   mediaId?: string;
   isUploading: boolean;
   url?: string;
+  isCropped?: boolean;
 }
 
 export default function useMediaUpload() {

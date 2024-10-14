@@ -8,13 +8,13 @@ export const metadata: Metadata = {
 
 export default function CollectsPage() {
   return (
-    <div className="flex h-full w-full gap-4">
+    <main className="flex h-full w-full gap-4">
       <div className="flex h-full w-full flex-col items-center justify-start gap-4 py-4">
         <Collects />
       </div>
       <div className="hidden lg:block py-4">
         <TrendsSidebar />
       </div>
-    </div>
+    </main>
   );
 }

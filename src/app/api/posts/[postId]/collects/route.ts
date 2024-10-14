@@ -13,6 +13,7 @@ export async function GET(
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    
     const collection = await prisma.collection.findUnique({
       where: {
         userId_postId: {
@@ -44,7 +45,20 @@ export async function POST(
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await prisma.collection.upsert({
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: {
+        userId: true,
+      },
+    });
+
+    if (!post) {
+      return Response.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    await prisma.$transaction([
+      prisma.collection.upsert({
       where: {
         userId_postId: {
           userId: loggedInUser.id,
@@ -53,10 +67,23 @@ export async function POST(
       },
       create: {
         userId: loggedInUser.id,
-        postId,
-      },
-      update: {},
-    });
+          postId,
+        },
+        update: {}, 
+      }),
+      ...(post.userId !== loggedInUser.id
+        ? [
+            prisma.notification.create({
+              data: {
+                recipientId: post.userId,
+                issuerId: loggedInUser.id,
+                type: "COLLECTION",
+                postId,
+              },
+            }),
+          ]
+        : []),
+    ]);
 
     return new Response();
   } catch (error) {
@@ -76,12 +103,35 @@ export async function DELETE(
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await prisma.collection.deleteMany({
-      where: {
-        userId: loggedInUser.id,
-        postId,
-      },
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { userId: true },
     });
+
+    if (!post) {
+      return Response.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    await prisma.$transaction([
+      prisma.collection.deleteMany({
+        where: {
+          userId: loggedInUser.id,
+            postId,
+        },
+      }),
+      ...(post.userId !== loggedInUser.id
+        ? [
+            prisma.notification.deleteMany({
+              where: {
+                recipientId: post.userId,
+                issuerId: loggedInUser.id,
+                type: "COLLECTION",
+                postId,
+              },
+            }),
+          ]
+        : []),
+    ]);
 
     return new Response();
   } catch (error) {

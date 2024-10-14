@@ -24,9 +24,10 @@ import Comments from "@/components/comments/Comments";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { DialogHeader, DialogTitle } from "../ui/dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { usePost } from "@/app/(main)/PostProvider";
 
-const imageWidth = 512;
-const textWidth = 384;
+const imageWidth = Number(process.env.DIALOG_IMAGE_WIDTH ?? "512");
+const textWidth = Number(process.env.DIALOG_TEXT_WIDTH ?? "384");
 
 export const Post = ({ postProps }: { postProps: PostData }) => {
   return (
@@ -59,50 +60,63 @@ export const Post = ({ postProps }: { postProps: PostData }) => {
   );
 };
 
-const DetailDialog = ({ postProps }: { postProps: PostData }) => {
+export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
   // function extractTags(content: string, regex: RegExp) {
   //   const matches = content.match(regex) || [];
   //   return matches;
   // }
+  const {open, onClose, onOpen, postId} = usePost();
   return (
-    <Dialog>
-      <DialogTrigger className="flex w-full flex-col items-center justify-center">
-        <div className="group relative aspect-auto h-72 w-full overflow-hidden">
-          <Image
-            src={postProps.attachments[0].url}
-            alt="media"
-            fill
-            // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            objectFit="cover"
-          />
-        </div>
-        {/* <div className="flex w-full flex-wrap gap-2">
+    <>
+      <Button className="group relative aspect-auto h-72 w-full overflow-hidden rounded-none">
+        <Image
+          src={postProps.attachments[0].url}
+          alt="media"
+          fill
+          onClick={() => onOpen(postProps.id)}
+          // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          objectFit="cover"
+        />
+      </Button>
+      <Dialog open={open && postId === postProps.id} onOpenChange={onClose}>
+        {/* <DialogTrigger className="flex w-full flex-col items-center justify-center">
+          <div className="group relative aspect-auto h-72 w-full overflow-hidden">
+            <Image
+              src={postProps.attachments[0].url}
+              alt="media"
+              fill
+              // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              objectFit="cover"
+            />
+          </div>
+          {/* <div className="flex w-full flex-wrap gap-2">
           {extractTags(postProps.content, /#(\w+)/g).map((tag, index) => (
             <span key={index} className="text-primary">
             {tag}
             </span>
           ))}
         </div> */}
-      </DialogTrigger>
-      <DialogContent
-        className={`border-none bg-card p-0 text-card-foreground`}
-        style={{ maxWidth: `${imageWidth + textWidth}px` }}
-      >
-        <VisuallyHidden.Root>
-          <DialogHeader>
-            <DialogTitle>Profile</DialogTitle>
-        </DialogHeader>
-          <DialogDescription>
-            See what's happening in the world right now
-          </DialogDescription>
-        </VisuallyHidden.Root>
-        <PostDetail postProps={postProps} />
-      </DialogContent>
-    </Dialog>
+        {/* </DialogTrigger> */}
+        <DialogContent
+          className={`border-none bg-card p-0 text-card-foreground`}
+          style={{ maxWidth: `${imageWidth + textWidth}px` }}
+        >
+          <VisuallyHidden.Root>
+            <DialogHeader>
+              <DialogTitle>Profile</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              See what's happening in the world right now
+            </DialogDescription>
+          </VisuallyHidden.Root>
+          <PostDetail postProps={postProps} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
-const PostDetail = ({ postProps }: { postProps: PostData }) => {
+export const PostDetail = ({ postProps }: { postProps: PostData }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   return (
     <div className="flex items-center justify-center">

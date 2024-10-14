@@ -28,6 +28,7 @@ export function useDeletePostMutation() {
         queryFilter,
         (oldData) => {
           if (!oldData) return;
+          console.log(oldData);
 
           return {
             pageParams: oldData.pageParams,

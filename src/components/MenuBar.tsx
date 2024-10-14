@@ -8,9 +8,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import EditorDialog from "./posts/editor/EditorDialog";
-import { useState } from "react";
+import { validateRequest } from "@/auth";
+import prisma from "@/lib/prisma";
+import NotificationButton from "./notifications/NotificationButton";
 
-export const MenuBar = ({ className }: { className?: string }) => {
+export const MenuBar = async ({ className }: { className?: string }) => {
+  const { user } = await validateRequest();
+  if (!user) return;
+
+  const unread = await prisma.notification.count({
+    where: { recipientId: user.id, read: false },
+  });
+
   return (
     <div
       className={cn(
@@ -24,12 +33,13 @@ export const MenuBar = ({ className }: { className?: string }) => {
           <span className="ml-2 hidden lg:inline">Home</span>
         </Link>
       </Button>
-      <Button variant="ghost" title="Notifications" asChild>
+      <NotificationButton unread={unread} />
+      {/* <Button variant="ghost" title="Notifications" asChild>
         <Link href="/notifications">
           <BellIcon className="h-6 w-6" />
           <span className="ml-2 hidden lg:inline">Notifications</span>
         </Link>
-      </Button>
+      </Button> */}
       <Button variant="ghost" title="Messages" asChild>
         <Link href="/messages">
           <MessageCircleIcon className="h-6 w-6" />

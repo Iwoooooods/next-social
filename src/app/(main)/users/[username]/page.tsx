@@ -40,10 +40,10 @@ export default async function ProfilePage({ params }: { params: { username: stri
   }
 
   return (
-    <div className="flex flex-col items-center mt-4 gap-4 w-full h-full">
+    <main className="flex flex-col items-center mt-4 gap-4 w-full h-full">
       <UserProfile user={user} loggedInUserId={loggedInUser.id}/>
       <UserPosts userId={user.id} />
-    </div>
+    </main>
   )
 }
 

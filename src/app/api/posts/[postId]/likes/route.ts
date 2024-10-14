@@ -7,23 +7,23 @@ export async function GET(
   { params }: { params: { postId: string } },
 ) {
   try {
-    const {user: loggedInUser} = await validateRequest();
+    const { user: loggedInUser } = await validateRequest();
     if (!loggedInUser) {
-      return Response.json({error: "Unauthorized"}, { status: 401 });
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     const post = await prisma.post.findUnique({
       where: {
         id: params.postId,
       },
       select: {
         likes: {
-            where: {
-                userId: loggedInUser.id
-            },
-            select: {
-                userId: true
-            }
+          where: {
+            userId: loggedInUser.id,
+          },
+          select: {
+            userId: true,
+          },
         },
         _count: {
           select: {
@@ -38,9 +38,9 @@ export async function GET(
     }
 
     const data: LikeInfo = {
-        likes: post._count.likes,
-        isLikedByUser: post.likes.length > 0
-    }
+      likes: post._count.likes,
+      isLikedByUser: post.likes.length > 0,
+    };
     return Response.json(data, { status: 200 });
   } catch (error) {
     return Response.json({ error: "Internal Server Error" }, { status: 500 });
@@ -56,43 +56,37 @@ export async function POST(
     if (!loggedInUser) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.log(postId);
-    const like = await prisma.like.upsert({
-      where: {
-        userId_postId: {
-          userId: loggedInUser.id,
-          postId,
-        },
-      },
-      create: {
-        userId: loggedInUser.id,
-        postId,
-      },
-      update: {},
-    });
-    
-    return Response.json({ success: true, like: like }, { status: 200 });
-  } catch (error) {
-    return Response.json({ error: "Internal Server Error" }, { status: 500 });
-  }
-}
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { postId: string } },
-) {
-  try {
-    const { user: loggedInUser } = await validateRequest();
-    if (!loggedInUser) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: {
+        userId: true,
+      },
+    });
+
+    if (!post) {
+      return Response.json({ error: "Post not found" }, { status: 404 });
     }
 
-    await prisma.like.deleteMany({
-      where: {
-        userId: loggedInUser.id,
-        postId: params.postId,
-      },
-    });
+    await prisma.$transaction([
+      prisma.like.upsert({
+        where: { userId_postId: { userId: loggedInUser.id, postId } },
+        create: { userId: loggedInUser.id, postId },
+        update: {},
+      }),
+      ...(post.userId !== loggedInUser.id
+        ? [
+            prisma.notification.create({
+              data: {
+                recipientId: post.userId,
+                issuerId: loggedInUser.id,
+                type: "LIKE",
+                postId,
+              },
+            }),
+          ]
+        : []),
+    ]);
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
@@ -100,3 +94,44 @@ export async function DELETE(
   }
 }
 
+export async function DELETE(
+  req: Request,
+  { params: { postId } }: { params: { postId: string } },
+) {
+  try {
+    const { user: loggedInUser } = await validateRequest();
+    if (!loggedInUser) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: {
+        userId: true,
+      },
+    });
+
+    if (!post) {
+      return Response.json({ error: "Post not found" }, { status: 404 });
+    }
+
+
+    await prisma.$transaction([
+      prisma.like.deleteMany({
+        where: { userId: loggedInUser.id, postId },
+      }),
+      prisma.notification.deleteMany({
+        where: {
+          recipientId: post.userId,
+          issuerId: loggedInUser.id,
+          type: "LIKE",
+          postId,
+        },
+      }),
+    ]);
+
+    return Response.json({ success: true }, { status: 200 });
+  } catch (error) {
+    return Response.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

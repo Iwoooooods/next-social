@@ -92,8 +92,8 @@ export function getCommentDataInclude(loggedInUserId: string) {
     post: {
       select: {
         userId: true,
-      }
-    }
+      },
+    },
   } satisfies Prisma.CommentInclude;
 }
 
@@ -104,4 +104,34 @@ export type CommentData = Prisma.CommentGetPayload<{
 export interface CommentPage {
   comments: CommentData[];
   nextCursor: string | null;
+}
+
+export function getNotificationInclude() {
+  return {
+    issuer: {
+      select: {
+      username: true,
+      displayName: true,
+      avatarUrl: true,
+    },
+  },
+  post: {
+    select: {
+      content: true,
+    },
+    },
+  } satisfies Prisma.NotificationInclude;
+}
+
+export type NotificationData = Prisma.NotificationGetPayload<{
+  include: ReturnType<typeof getNotificationInclude>;
+}>;
+
+export interface NotificationPage {
+  notifications: NotificationData[];
+  nextCursor: string | null;
+}
+
+export interface NotificationCount {
+  unread: number;
 }

@@ -68,6 +68,8 @@ export function useDeleteCommentMutation() {
         queryKey,
         (oldData) => {
           if (!oldData) return;
+          console.log(oldData);
+          
           return {
             pageParams: oldData.pageParams,
             pages: oldData.pages.map((page) => ({

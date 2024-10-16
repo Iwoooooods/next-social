@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/form";
 import PasswordInput from "@/components/PasswordInput";
 import { Input } from "@/components/ui/input";
-import LoginButton from "@/components/LoginButton";
 import Link from "next/link";
+import GoogleLoginButton from "../GoogleLoginButton";
+import { LogIn } from "lucide-react";
+import LoginButton from "@/components/LoginButton";
 
 export default function LoginForm() {
   const [error, setError] = useState<string>();
@@ -54,7 +56,7 @@ export default function LoginForm() {
                 <Input
                   placeholder="Username"
                   {...field}
-                  className="max-w-64 rounded-sm border-2 md:w-80 lg:w-96 bg-card text-card-foreground"
+                  className="w-64 rounded-sm border-2 md:w-80 lg:w-96 bg-card text-card-foreground outline-none"
                 />
               </FormControl>
               <FormMessage />
@@ -72,7 +74,7 @@ export default function LoginForm() {
                   type="password"
                   placeholder="Password"
                   {...field}
-                  className="max-w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
+                  className="w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -83,10 +85,12 @@ export default function LoginForm() {
         <LoginButton
           type="submit"
           loading={isPending}
-          className="mt-auto rounded-sm max-w-64 border-2 md:w-80 lg:w-96 bg-card text-card-foreground"
+          className="mt-auto rounded-sm w-64 border-2 md:w-80 lg:w-96 bg-card text-card-foreground flex items-center gap-2"
         >
+          <LogIn size={24} />
           Sign In
         </LoginButton>
+        <div className="w-64 md:w-80 lg:w-96"><GoogleLoginButton className="bg-transparent text-card hover:bg-gray-200 hover:text-card" /></div>
         <div className="text-md">
           Don't have an account?{" "}
           <Link href="/signup" className="underline">

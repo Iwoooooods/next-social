@@ -17,6 +17,7 @@ import PasswordInput from "@/components/PasswordInput";
 import { Input } from "@/components/ui/input";
 import LoginButton from "@/components/LoginButton";
 import Link from "next/link";
+import GoogleLoginButton from "../GoogleLoginButton";
 
 export default function SignUpForm() {
   const [error, setError] = useState<string>();
@@ -55,7 +56,7 @@ export default function SignUpForm() {
                 <Input
                   placeholder="Email"
                   {...field}
-                  className="max-w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
+                  className="w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -72,7 +73,7 @@ export default function SignUpForm() {
                 <Input
                   placeholder="Username"
                   {...field}
-                  className="max-w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
+                  className="w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -90,7 +91,7 @@ export default function SignUpForm() {
                   type="password"
                   placeholder="Password"
                   {...field}
-                  className="max-w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
+                  className="w-64 rounded-sm md:w-80 lg:w-96 bg-card text-card-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -101,10 +102,11 @@ export default function SignUpForm() {
         <LoginButton
           type="submit"
           loading={isPending}
-          className="mt-auto max-w-64 rounded-sm border-2 md:w-80 lg:w-96 bg-card-foreground text-card"
+          className="mt-auto w-64 rounded-sm border-2 md:w-80 lg:w-96 bg-card-foreground text-card"
         >
           Create Account
         </LoginButton>
+        <div className="w-64 md:w-80 lg:w-96"><GoogleLoginButton /></div>
         <div className="text-md">
           Already have an account?{" "}
           <Link href="/login" className="underline">

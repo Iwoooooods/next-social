@@ -354,3 +354,5 @@ const MemoCropper = memo(
     );
   },
 );
+
+MemoCropper.displayName = "MemoCropper";

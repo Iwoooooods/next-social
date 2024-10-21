@@ -196,3 +196,5 @@ const AttachmentButton = ({
     </div>
   );
 };
+
+PostEditor.displayName = "PostEditor";

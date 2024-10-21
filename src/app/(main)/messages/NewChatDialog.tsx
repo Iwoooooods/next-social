@@ -21,6 +21,7 @@ import { Check, Loader2, SearchIcon, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import UserAvatar from "@/components/UserAvatar";
 import LoadingButton from "@/components/LoadingButton";
+import UnauthorizedMessage from "@/components/UnauthorizedMessage";
 
 export default function NewChatDialog({
   open,
@@ -38,9 +39,9 @@ export default function NewChatDialog({
   const [selectedUsers, setSelectedUsers] = useState<
     UserResponse<DefaultStreamChatGenerics>[]
   >([]);
-  
+
   const { user: loggedInUser } = useSession();
-  if (!loggedInUser) return null;
+  if (!loggedInUser) return <UnauthorizedMessage /> ;
 
   const { data, isFetching, isError, isSuccess } = useQuery({
     queryKey: ["stream-users", debouncedSearchInput],

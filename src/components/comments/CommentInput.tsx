@@ -1,49 +1,42 @@
 import { PostData } from "@/lib/types";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useSubmitCommentMutation } from "./mutation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Send, Loader2 } from "lucide-react";
-import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
+import { Textarea } from "../ui/textarea";
 
 export default function CommentInput({ post }: { post: PostData }) {
-  //   const [input, setInput] = useState<string>("");
-  const mutation = useSubmitCommentMutation(post.id);
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        bold: false,
-        italic: false,
-      }),
-      Placeholder.configure({
-        placeholder: "Add a comment...",
-      }),
-    ],
-  });
-  const input = editor?.getText({ blockSeparator: "\n" }) || "";
+  const [input, setInput] = useState<string>("");
+  const mutation = useSubmitCommentMutation(post.id); 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!input.trim()) return;
     mutation.mutate(
       { post, content: input },
-      { onSuccess: () => editor?.commands.clearContent() },
+      { onSuccess: () => setInput("") },
     );
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      textareaRef.current?.blur();
+      handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+    }
+  };
+
   return (
     <form className="relative flex items-center gap-2" onSubmit={handleSubmit}>
-      {/* <Input
-        placeholder="Add a comment..."
+      <Textarea
+        ref={textareaRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        autoFocus
-      /> */}
-      <EditorContent
-        editor={editor}
-        className="max-h-16 w-full overflow-y-auto bg-background p-2 pr-8"
+        onKeyDown={handleKeyDown}
+        className="rounded-xl resize-none focus:outline-none min-h-10 max-h-16 w-full overflow-y-auto bg-background p-2 pr-8"
+        placeholder="Add a comment..."
+        rows={1}
       />
       <Button
         type="submit"

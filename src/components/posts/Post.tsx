@@ -1,6 +1,6 @@
 "use client";
 
-import { PostData } from "@/lib/types";
+import { CommentPage, PostData } from "@/lib/types";
 import UserAvatar from "../UserAvatar";
 import UserTooltip from "../UserTooltip";
 import { formatDate } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { PostMoreButton } from "./PostMoreButton";
 import Linkify from "../Linkify";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,9 +25,10 @@ import { AspectRatio } from "../ui/aspect-ratio";
 import { DialogHeader, DialogTitle } from "../ui/dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { usePost } from "@/app/(main)/PostProvider";
-
-const imageWidth = Number(process.env.DIALOG_IMAGE_WIDTH ?? "512");
-const textWidth = Number(process.env.DIALOG_TEXT_WIDTH ?? "384");
+import { useSession } from "@/app/(main)/SessionProvider";
+import { usePostSize } from "@/app/(main)/PostSizeProvider";
+import "./post.module.css";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 
 export const Post = ({ postProps }: { postProps: PostData }) => {
   return (
@@ -65,7 +66,8 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
   //   const matches = content.match(regex) || [];
   //   return matches;
   // }
-  const {open, onClose, onOpen, postId} = usePost();
+  const { open, onClose, onOpen, postId } = usePost();
+  // const { imageWidth, textEditorWidth } = usePostSize();
   return (
     <>
       <Button className="group relative aspect-auto h-72 w-full overflow-hidden rounded-none">
@@ -79,27 +81,9 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
         />
       </Button>
       <Dialog open={open && postId === postProps.id} onOpenChange={onClose}>
-        {/* <DialogTrigger className="flex w-full flex-col items-center justify-center">
-          <div className="group relative aspect-auto h-72 w-full overflow-hidden">
-            <Image
-              src={postProps.attachments[0].url}
-              alt="media"
-              fill
-              // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              objectFit="cover"
-            />
-          </div>
-          {/* <div className="flex w-full flex-wrap gap-2">
-          {extractTags(postProps.content, /#(\w+)/g).map((tag, index) => (
-            <span key={index} className="text-primary">
-            {tag}
-            </span>
-          ))}
-        </div> */}
-        {/* </DialogTrigger> */}
         <DialogContent
-          className={`border-none bg-card p-0 text-card-foreground`}
-          style={{ maxWidth: `${imageWidth + textWidth}px` }}
+          className="border-none bg-card p-0 text-card-foreground overflow-hidden max-w-[478px] md:max-w-[862px]"
+          // style={{ maxWidth: `${imageWidth + textEditorWidth}px` }}
         >
           <VisuallyHidden.Root>
             <DialogHeader>
@@ -116,23 +100,59 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
   );
 };
 
-export const PostDetail = ({ postProps }: { postProps: PostData }) => {
+export const PostDetail = ({ postProps}: { postProps: PostData}) => { 
+  const { user: loggedInUser } = useSession();
+  const { imageWidth, textEditorWidth } = usePostSize();
   const [currentIndex, setCurrentIndex] = useState(0);
+  // const { pinnedCommentId, setPinnedCommentId } = usePost();
+  // const queryClient = useQueryClient();
+
+  // useEffect(() => {
+  //   if (pinnedCommentId) {
+  //     // Update the query data to pin the comment
+    //   queryClient.setQueryData<InfiniteData<CommentPage, string | null>>(['comments', postProps.id], (oldData) => {
+    //     if (!oldData) return;
+
+    //     const pinnedComment = oldData.pages.flatMap(page => page.comments).find(comment => comment.id === pinnedCommentId);
+        
+    //     if (!pinnedComment) return oldData;
+
+    //     const newPages = oldData.pages.map((page, index) => {
+    //       if (index === 0) {
+    //         return {
+    //           ...page,
+    //           comments: [pinnedComment, ...page.comments.filter(comment => comment.id !== pinnedCommentId)]
+    //         };
+    //       }
+    //       return {
+    //         ...page,
+    //         comments: page.comments.filter(comment => comment.id !== pinnedCommentId)
+    //       };
+    //     });
+
+    //     return {
+    //       ...oldData,
+    //       pages: newPages
+    //     };
+    //   });
+    // }
+  // }, []);
+
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center md:flex-row max-h-[90vh] overflow-hidden rounded-2xl">
       <div
-        className={`group relative flex flex-col overflow-hidden bg-card`}
+        className={`group relative flex flex-col bg-card`}
         style={{ width: `${imageWidth}px` }}
       >
         <AspectRatio
-          ratio={postProps.mediaRatio ?? 1}
+          ratio={3 / 4}
           className="relative h-full w-full"
         >
           <Image
             src={postProps.attachments[currentIndex].url}
             alt="media"
             fill
-            objectFit="cover"
+            className="object-contain object-center"
           />
         </AspectRatio>
         {currentIndex > 0 && (
@@ -175,13 +195,13 @@ export const PostDetail = ({ postProps }: { postProps: PostData }) => {
         </div>
       </div>
       <div
-        className={`relative hidden max-w-sm flex-col gap-2 bg-card p-4 text-card-foreground md:flex`}
-        style={{
-          width: `${textWidth}px`,
-          height: `${imageWidth / (postProps.mediaRatio ?? 1)}px`,
-        }}
+        className={`relative flex max-w-sm flex-col gap-2 bg-card p-4 text-card-foreground h-full w-[478px] md:w-[384px]`}
+        // style={{
+        //   width: `${textEditorWidth}px`,
+        //   // height: `${imageWidth / (postProps.mediaRatio ?? 1)}px`,
+        // }}
       >
-        <div className="no-scrollbar flex max-h-[calc(100%-110px)] flex-col overflow-y-scroll">
+        <div className="no-scrollbar flex flex-col overflow-y-scroll max-h-[calc(100%-96px)]">
           <div className="flex w-full items-center justify-start gap-4">
             <UserTooltip user={postProps.user}>
               <Link href={`/users/${postProps.user.username}`}>
@@ -204,7 +224,7 @@ export const PostDetail = ({ postProps }: { postProps: PostData }) => {
             </p>
           </Linkify>
           <hr className="w-full py-2" />
-          <Comments post={postProps} />
+          <Comments post={postProps}/>
         </div>
         <div className="absolute bottom-0 left-0 flex max-h-36 w-full flex-col gap-1 p-2">
           <div className="flex items-start justify-start gap-2 px-2">
@@ -213,7 +233,7 @@ export const PostDetail = ({ postProps }: { postProps: PostData }) => {
               initialState={{
                 likes: postProps._count.likes,
                 isLikedByUser: postProps.likes.some(
-                  (like) => like.userId === postProps.user.id,
+                  (like) => like.userId === loggedInUser?.id,
                 ),
               }}
               className="h-[36px] w-[36px] rounded-full p-0"
@@ -222,7 +242,7 @@ export const PostDetail = ({ postProps }: { postProps: PostData }) => {
               postId={postProps.id}
               initialState={{
                 isCollectedByUser: postProps.collections.some(
-                  (collection) => collection.userId === postProps.user.id,
+                  (collection) => collection.userId === loggedInUser?.id,
                 ),
               }}
               className="h-[36px] w-[36px] rounded-full p-0"

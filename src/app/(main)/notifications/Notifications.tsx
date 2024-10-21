@@ -71,7 +71,7 @@ export default function Notifications() {
         onBottomReached={() => {
           hasNextPage && !isFetching && fetchNextPage();
         }}
-        className="max-w-64 gap-0 border-r-2 border-border bg-card text-card-foreground outline-2"
+        className="size-full gap-0 border-r-2 border-border bg-card text-card-foreground outline-2"
       >
         {notifications.map((notification) => (
           <Notification key={notification.id} notification={notification} />
@@ -84,13 +84,13 @@ export default function Notifications() {
 
 function NotificationSkeleton() {
   return (
-    <div className="border-r-2 border-border bg-card text-card-foreground outline-2">
-      <div className="flex max-h-24 w-full max-w-64 flex-col gap-2 px-4 py-2">
-        <div className="flex h-1/2 w-full items-center gap-2">
-          <Skeleton className="h-9 w-9 bg-background" />
+    <div className="size-full border-r-2 border-border bg-card text-card-foreground outline-2">
+      <div className="flex max-h-24 w-full gap-2 p-4 items-center">
+        <Skeleton className="h-12 w-12 rounded-full bg-background" />
+        <div className="flex flex-col w-full gap-2">
           <Skeleton className="h-9 w-36 rounded-xl bg-background" />
+          <Skeleton className="max-h-32 w-[80%] overflow-y-auto rounded-xl bg-background p-4" />
         </div>
-        <Skeleton className="max-h-32 w-full overflow-y-auto rounded-xl bg-background p-4" />
       </div>
     </div>
   );

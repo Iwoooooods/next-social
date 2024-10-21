@@ -57,7 +57,6 @@ model Post {
   updatedAt DateTime @updatedAt
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mediaRatio    Float?
   attachments   Media[]
   likes         Like[]
   collections   Collection[]
@@ -76,6 +75,7 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  linkedNotifications Notification[]
 
   @@map("comments")
 }
@@ -140,6 +140,8 @@ model Notification {
   read        Boolean          @default(false)
   postId      String?
   post        Post?            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId   String?
+  comment     Comment?         @relation(fields: [commentId], references: [id], onDelete: Cascade)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 

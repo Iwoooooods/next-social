@@ -8,6 +8,7 @@ export async function GET(
 ) {
   try {
     const { user: loggedInUser } = await validateRequest();
+
     if (!loggedInUser) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -36,11 +37,12 @@ export async function GET(
     if (!post) {
       return new Response(null, { status: 404 });
     }
-
+    console.log(post);
     const data: LikeInfo = {
       likes: post._count.likes,
       isLikedByUser: post.likes.length > 0,
     };
+
     return Response.json(data, { status: 200 });
   } catch (error) {
     return Response.json({ error: "Internal Server Error" }, { status: 500 });

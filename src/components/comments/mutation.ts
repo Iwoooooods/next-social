@@ -41,6 +41,7 @@ export const useSubmitCommentMutation = (postId: string) => {
           return !query.state.data;
         },
       });
+      
       toast({
         description: "Comment created",
       });

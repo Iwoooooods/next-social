@@ -41,7 +41,6 @@ export default function NewChatDialog({
   >([]);
 
   const { user: loggedInUser } = useSession();
-  if (!loggedInUser) return <UnauthorizedMessage /> ;
 
   const { data, isFetching, isError, isSuccess } = useQuery({
     queryKey: ["stream-users", debouncedSearchInput],

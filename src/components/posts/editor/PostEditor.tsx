@@ -51,7 +51,7 @@ export const PostEditor = React.memo(() => {
         mediaIds: attachments
           .map((attachment) => attachment.mediaId)
           .filter(Boolean) as string[],
-        mediaRatio: 1,
+        // mediaRatio: 1,
       },
       {
         onSuccess: () => {

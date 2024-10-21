@@ -1,37 +1,16 @@
 "use client";
 
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  SquarePen,
-  ArrowLeft,
-  ArrowRight,
-  Plus,
-  Scissors,
-  Trash,
-} from "lucide-react";
+import { SquarePen } from "lucide-react";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import useMediaUpload, { Attachment } from "@/hooks/useMediaUpload";
-import { useEffect, useRef, createRef } from "react";
-import LoadingButton from "@/components/LoadingButton";
-import Image from "next/image";
+import useMediaUpload from "@/hooks/useMediaUpload";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { DialogDescription } from "@/components/ui/dialog";
-import { Cropper, ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import { Editor, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import { EditorContent } from "@tiptap/react";
-import { useSession } from "@/app/(main)/SessionProvider";
-import UserAvatar from "@/components/UserAvatar";
-import { useSubmitPostMutation } from "./mutation";
-import { Dispatch, SetStateAction, memo, RefObject } from "react";
 import { deleteAttachment } from "./action";
 import "./styles.css";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -63,6 +42,7 @@ export default function EditorDialog() {
       open={open}
       onOpenChange={async (open) => {
         setOpen(open);
+        // reset the media uploader when the dialog is closed
         if (!open) {
           mediaUploader.reset();
           setCurrentStep("crop");

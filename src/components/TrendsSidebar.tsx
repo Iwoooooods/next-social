@@ -56,7 +56,7 @@ const WhoToFollow = async () => {
             <h2 className="text-lg font-bold hover:underline">
               {user.displayName}
             </h2>
-            <p className="text-sm text-muted-foreground">"description"</p>
+            <p className="text-sm text-muted-foreground">&quot;description&quot;</p>
           </Link>
           <FollowButton userId={user.id} initialState={
             {

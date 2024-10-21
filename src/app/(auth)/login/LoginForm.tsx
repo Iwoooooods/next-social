@@ -92,7 +92,7 @@ export default function LoginForm() {
         </LoginButton>
         <div className="w-64 md:w-80 lg:w-96"><GoogleLoginButton className="bg-transparent text-card hover:bg-gray-200 hover:text-card" /></div>
         <div className="text-md">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/signup" className="underline">
             Sign Up
           </Link>

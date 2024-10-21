@@ -95,6 +95,7 @@ export const PostEditor = React.memo(() => {
         <div className={cn("flex gap-2 p-2 flex-wrap")}>
           {attachments.map((attachment: Attachment) => (
             <AttachmentPreview
+              key={attachment.file.name}
               attachment={attachment}
               removeAttachment={handleRemoveAttachment}
             />

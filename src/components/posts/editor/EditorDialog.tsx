@@ -73,7 +73,7 @@ export default function EditorDialog() {
         <DialogHeader className="px-4 py-2">
           <DialogTitle className="text-center">Create a new post</DialogTitle>
           <DialogDescription className="text-center">
-            What's on your mind?
+            What&apos;s on your mind?
           </DialogDescription>
         </DialogHeader>
         {mediaUploader.attachments.length === 0 ? (

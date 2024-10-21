@@ -189,7 +189,7 @@ export default function Notification({
                   <DialogTitle>Profile</DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                  See what's happening in the world right now
+                  See what&apos;s happening in the world right now
                 </DialogDescription>
               </VisuallyHidden.Root>
               <PostDetail postProps={post} />

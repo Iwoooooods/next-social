@@ -33,8 +33,10 @@ export default function NewChatDialog({
 }) {
   const { client, setActiveChannel } = useChatContext();
   const { toast } = useToast();
+  
   const { user: loggedInUser } = useSession();
   if (!loggedInUser) return null;
+
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearchInput = useDebounce(searchInput, 500);
   const [selectedUsers, setSelectedUsers] = useState<

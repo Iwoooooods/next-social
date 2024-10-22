@@ -2,8 +2,9 @@ import { validateRequest } from "@/auth";
 import streamSeverClient from "@/lib/stream";
 
 export async function GET() {
+  const { user } = await validateRequest();
+
   try {
-    const { user } = await validateRequest();
     if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }

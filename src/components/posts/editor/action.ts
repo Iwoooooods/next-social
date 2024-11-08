@@ -8,29 +8,29 @@ import { UTApi } from "uploadthing/server";
 
 export async function submitPost(input: {
   content: string;
-  title: string;
   mediaIds: string[];
+  mediaRatio: number;
 }) {
   const { user } = await validateRequest();
 
   if (!user) {
     throw new Error("User not found");
   }
-
-  const { content, mediaIds, title } = createPostSchema.parse(input);
+  
+  const { content, mediaIds } = createPostSchema.parse(input);
 
   const newPost = await prisma.post.create({
     data: {
       content,
-      title,
       userId: user.id,
       attachments: {
         connect: mediaIds.map((id) => ({ id })),
       },
+      mediaRatio: input.mediaRatio,
     },
     include: getPostDataInclude(user.id),
   });
-
+  
   return newPost;
 }
 

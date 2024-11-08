@@ -34,13 +34,13 @@ export default function NewChatDialog({
 }) {
   const { client, setActiveChannel } = useChatContext();
   const { toast } = useToast();
+  const { user: loggedInUser } = useSession();
+  if (!loggedInUser) return null;
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearchInput = useDebounce(searchInput, 500);
   const [selectedUsers, setSelectedUsers] = useState<
     UserResponse<DefaultStreamChatGenerics>[]
   >([]);
-
-  const { user: loggedInUser } = useSession();
 
   const { data, isFetching, isError, isSuccess } = useQuery({
     queryKey: ["stream-users", debouncedSearchInput],

@@ -29,9 +29,9 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { deleteNotification } from "@/components/notifications/action";
 import { Loader2 } from "lucide-react";
-import { usePostSize } from "../PostSizeProvider";
-import Image from "next/image";
-import { CommentData } from "@/lib/types";
+
+const imageWidth = Number(process.env.DIALOG_IMAGE_WIDTH ?? "512");
+const textWidth = Number(process.env.DIALOG_TEXT_WIDTH ?? "384");
 
 export default function Notification({
   notification,
@@ -43,12 +43,7 @@ export default function Notification({
       message: `followed you`,
     },
     COMMENT: {
-      message: `commented: ${
-        notification.comment?.content &&
-        notification.comment?.content?.length > 20
-          ? notification.comment?.content?.slice(0, 20) + "..."
-          : notification.comment?.content
-      }`,
+      message: `sent a comment`,
     },
     LIKE: {
       message: `liked your post`,
@@ -60,7 +55,6 @@ export default function Notification({
       message: `mentioned you in a post`,
     },
   };
-  const { imageWidth, textEditorWidth } = usePostSize();
   const { message } = notificationTypeMap[notification.type];
   const { open, onClose, onOpen, postId } = usePost();
   const [post, setPost] = useState<PostData | undefined>();
@@ -106,24 +100,11 @@ export default function Notification({
 
   async function handleClick() {
     if (!notification.postId) return;
-    if (notification.type === NotificationType.COMMENT) {
-      const [commentId, post] = await Promise.all([
-        kyInstance
-          .get(
-            `/api/posts/${notification.postId}/${notification.commentId}/pinned-comment`,
-          )
-          .json<{ id: string }>()
-          .then((res) => res.id),
-        kyInstance.get(`/api/posts/${notification.postId}`).json<PostData>(),
-      ]);
-
-      setPost(post);
-      onOpen(post.id, commentId);
-    } else {
-      const post = await kyInstance.get(`/api/posts/${notification.postId}`).json<PostData>();
-      setPost(post);
-      onOpen(post.id);
-    }
+    const post = await kyInstance
+      .get(`/api/posts/${notification.postId}`)
+      .json<PostData>();
+    setPost(post);
+    onOpen(post.id);
   }
 
   async function handleNotificationDelete(e: React.MouseEvent) {
@@ -146,34 +127,23 @@ export default function Notification({
         <Button
           variant="ghost"
           onClick={handleClick}
-          className="relative block h-fit w-full cursor-pointer justify-start rounded-none px-0"
+          className="block h-fit w-full cursor-pointer justify-start rounded-none px-0"
+          asChild
         >
           <div
             className={cn(
-              "relative flex h-24 w-full items-center justify-start gap-4 overflow-hidden",
-              !notification.read && "bg-primary/20",
+              "relative flex w-full items-center justify-start gap-2 overflow-hidden",
+              !notification.read && "bg-primary/10",
             )}
           >
             <UserAvatar avatarUrl={notification.issuer.avatarUrl} size={48} />
-            <div className="flex flex-col gap-2 text-left">
-              <span className="w-full text-lg font-bold">
+            <div className="flex flex-col items-center">
+              <span className="w-full font-bold">
                 {notification.issuer.displayName}
               </span>
               <span className="w-full">{message}</span>
             </div>
           </div>
-          {notification.post?.attachments && (
-            <div className="absolute bottom-1/2 right-[2%] size-24 translate-y-1/2 overflow-hidden rounded-lg">
-              <Image
-                src={notification.post.attachments[0].url}
-                alt="media"
-                fill
-                sizes="96px"
-                className="object-cover"
-              />
-            </div>
-          )}
-          <hr className="absolute bottom-0 w-[98%]" />
         </Button>
         {post && (
           <Dialog
@@ -182,7 +152,7 @@ export default function Notification({
           >
             <DialogContent
               className={`z-50 border-none bg-card p-0 text-card-foreground`}
-              style={{ maxWidth: `${imageWidth + textEditorWidth}px` }}
+              style={{ maxWidth: `${imageWidth + textWidth}px` }}
             >
               <VisuallyHidden.Root>
                 <DialogHeader>

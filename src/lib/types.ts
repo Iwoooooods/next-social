@@ -110,27 +110,15 @@ export function getNotificationInclude() {
   return {
     issuer: {
       select: {
-        username: true,
-        displayName: true,
-        avatarUrl: true,
-      },
+      username: true,
+      displayName: true,
+      avatarUrl: true,
     },
-    post: {
-      select: {
-        content: true,
-        attachments: {
-          take: 1,
-          select: {
-            url: true,
-          },
-        },
-      },
+  },
+  post: {
+    select: {
+      content: true,
     },
-    comment: {
-      select: {
-        id: true,
-        content: true,
-      },
     },
   } satisfies Prisma.NotificationInclude;
 }

@@ -1,28 +1,50 @@
 "use client";
 
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { SquarePen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  SquarePen,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Scissors,
+  Trash,
+} from "lucide-react";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import useMediaUpload from "@/hooks/useMediaUpload";
+import useMediaUpload, { Attachment } from "@/hooks/useMediaUpload";
+import { useEffect, useRef, createRef } from "react";
+import LoadingButton from "@/components/LoadingButton";
+import Image from "next/image";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { DialogDescription } from "@/components/ui/dialog";
+import { Cropper, ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import { Editor, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import { EditorContent } from "@tiptap/react";
+import { useSession } from "@/app/(main)/SessionProvider";
+import UserAvatar from "@/components/UserAvatar";
+import { useSubmitPostMutation } from "./mutation";
+import { Dispatch, SetStateAction, memo, RefObject } from "react";
 import { deleteAttachment } from "./action";
 import "./styles.css";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 const imageWidth = 512;
 const textEditorWidth = 384;
 
 export default function EditorDialog() {
-  const { imageWidth, textEditorWidth } = usePostSize();
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<"crop" | "text">("crop");
   const mediaUploader = useMediaUpload();
+  const [aspectRatio, setAspectRatio] = useState<number>(1);
 
   const onFileSelected = (files: File[]) => {
     mediaUploader.setAttachments((prev) => [
@@ -41,7 +63,6 @@ export default function EditorDialog() {
       open={open}
       onOpenChange={async (open) => {
         setOpen(open);
-        // reset the media uploader when the dialog is closed
         if (!open) {
           mediaUploader.reset();
           setCurrentStep("crop");
@@ -56,7 +77,7 @@ export default function EditorDialog() {
         }
       }}
     >
-      <DialogTrigger className="flex size-full items-center rounded-md px-4 py-2 hover:bg-accent hover:text-accent-foreground">
+      <DialogTrigger className="flex w-full items-center rounded-md px-4 py-2 hover:bg-accent hover:text-accent-foreground">
         <SquarePen className="h-6 w-6" />
         <span className="ml-2 hidden text-sm font-medium lg:inline">
           Create
@@ -80,12 +101,14 @@ export default function EditorDialog() {
         {mediaUploader.attachments.length === 0 ? (
           <MediaPicker onFileSelected={onFileSelected} />
         ) : (
-          <MediaCropper
+          <MediaPreview
             setOpen={setOpen}
             uploader={mediaUploader}
             onFileSelected={onFileSelected}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            aspectRatio={aspectRatio}
+            setAspectRatio={setAspectRatio}
           />
         )}
       </DialogContent>
@@ -165,17 +188,19 @@ function MediaPreview({
     ],
     autofocus: true,
   });
+  const titleRef = useRef<HTMLInputElement>(null);
 
   const input = editor?.getText({ blockSeparator: "\n" }) || "";
+  const title = titleRef.current?.value || "";
 
   const onPostSubmit = async () => {
     mutation.mutate(
       {
         content: input,
+        title,
         mediaIds: uploader.attachments
           .map((attachment) => attachment.mediaId)
           .filter(Boolean) as string[],
-        mediaRatio: aspectRatio,
       },
       {
         onSuccess: () => {
@@ -296,7 +321,11 @@ function MediaPreview({
             variant="outline"
             loading={mutation.isPending}
             onClick={onPostSubmit}
-            disabled={mutation.isPending || input.trim().length === 0}
+            disabled={
+              mutation.isPending ||
+              title.trim().length === 0 ||
+              input.trim().length === 0
+            }
             className="h-[36px] w-[36px] rounded-full bg-card p-0 text-card-foreground hover:bg-card-foreground hover:text-card"
           >
             Post
@@ -435,6 +464,7 @@ function MediaPreview({
         {currentStep === "text" && (
           <TextEditor
             editor={editor}
+            titleRef={titleRef}
             size={{ width, height: width / aspectRatio }}
           />
         )}
@@ -443,7 +473,7 @@ function MediaPreview({
   );
 }
 
-const MemoCropper = memo(
+const MemoCropper =
   ({
     src,
     cropperRef,
@@ -476,8 +506,7 @@ const MemoCropper = memo(
         ref={cropperRef}
       />
     );
-  },
-);
+  }
 
 function AttachmentButton({
   onClick,
@@ -533,8 +562,10 @@ function AttachmentButton({
 function TextEditor({
   editor,
   size,
+  titleRef,
 }: {
   editor: Editor | null;
+  titleRef: RefObject<HTMLInputElement>;
   size: { width: number; height: number };
 }) {
   const { user } = useSession();
@@ -544,13 +575,18 @@ function TextEditor({
       className="relative w-full max-w-sm space-y-4 border-2 border-border bg-card p-4 text-card-foreground outline-2"
       style={{ height: size.height, maxHeight: size.height }}
     >
-      <div className="flex h-full w-full flex-col">
+      <div className="flex h-full w-full flex-col gap-2">
         <div className="flex items-center">
           <UserAvatar
             avatarUrl={user.avatarUrl}
             className="mr-4 hidden sm:inline"
           />
         </div>
+        <Input
+          ref={titleRef}
+          placeholder="Add a title to make people see you!"
+          className="rounded-none border-2 border-border bg-transparent"
+        />
         <EditorContent
           editor={editor}
           className={`h-full max-h-full w-full overflow-y-auto rounded-md bg-transparent p-4`}

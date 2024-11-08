@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const data: PostPage = {
       posts: posts.slice(0, pageSize),
       nextCursor,
-    }
+    };
     return Response.json(data);
   } catch (error) {
     return new Response("Internal Server Error", { status: 500 });

@@ -21,7 +21,7 @@ export default function InfiniteScrollContainer({
   });
 
   return (
-    <div className={cn("flex w-full flex-col items-center justify-start gap-4", className)}>
+    <div className="px-auto">
       {children}
       <div ref={ref} />
     </div>

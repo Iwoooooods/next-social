@@ -22,13 +22,11 @@ export async function login(
       },
     });
     if (!existingUser || !existingUser.passwordHash) {
-      console.log("no such user");
       return { error: "Invalid credentials" };
     }
     const passwordMatch = verify(password, existingUser.passwordHash);
 
     if (!passwordMatch) {
-      console.log("password does not match");
       return { error: "Invalid credentials" };
     }
 
@@ -44,7 +42,6 @@ export async function login(
     if (isRedirectError(error)) {
       throw error;
     }
-    console.log("error", error);
     return { error: "Invalid credentials" };
   }
 }

@@ -29,7 +29,7 @@ export const PostMoreButton = ({
             size="icon"
             variant="ghost"
             className={cn(
-              "focus-visible:ring-0 focus-visible:ring-offset-0",
+              "hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
               className,
             )}
           >
@@ -39,7 +39,7 @@ export const PostMoreButton = ({
         <DropdownMenuContent>
           {user?.id === post.user.id && (
             <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
-              <span className="text-destructive flex items-center w-auto">
+              <span className="flex w-auto items-center text-destructive">
                 <Trash2 className="mr-2" />
                 Delete
               </span>

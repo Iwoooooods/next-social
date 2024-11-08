@@ -48,6 +48,7 @@ export const PostEditor = React.memo(() => {
     mutation.mutate(
       {
         content: input,
+        title
         mediaIds: attachments
           .map((attachment) => attachment.mediaId)
           .filter(Boolean) as string[],

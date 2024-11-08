@@ -20,7 +20,7 @@ export default function LikeButton({
   const { data } = useQuery({
     queryKey,
     queryFn: () =>
-      fetch(`/api/posts/${postId}/likes`).then((res) => res.json()),
+      kyInstance.get(`/api/posts/${postId}/likes`).json<LikeInfo>(),
     initialData: initialState,
     staleTime: Infinity,
   });

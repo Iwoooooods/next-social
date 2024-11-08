@@ -21,18 +21,16 @@ const PasswordInput = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         />
         <Button
-          variant="ghost"
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 transform text-muted-foreground bg-transparent hover:bg-transparent"
+        variant="ghost"
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 transform text-muted-foreground bg-transparent hover:bg-transparent"
         >
-          {showPassword ? <EyeOff /> : <Eye />}
+            {showPassword ? <EyeOff /> : <Eye />}
         </Button>
       </div>
     );
   },
 );
-
-PasswordInput.displayName = 'PasswordInput';
 
 export default PasswordInput;

@@ -19,10 +19,10 @@ const imageWidth = 512;
 const textEditorWidth = 384;
 
 export default function EditorDialog() {
+  const { imageWidth, textEditorWidth } = usePostSize();
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<"crop" | "text">("crop");
   const mediaUploader = useMediaUpload();
-  const [aspectRatio, setAspectRatio] = useState<number>(1);
 
   const onFileSelected = (files: File[]) => {
     mediaUploader.setAttachments((prev) => [
@@ -56,7 +56,7 @@ export default function EditorDialog() {
         }
       }}
     >
-      <DialogTrigger className="flex w-full items-center rounded-md px-4 py-2 hover:bg-accent hover:text-accent-foreground">
+      <DialogTrigger className="flex size-full items-center rounded-md px-4 py-2 hover:bg-accent hover:text-accent-foreground">
         <SquarePen className="h-6 w-6" />
         <span className="ml-2 hidden text-sm font-medium lg:inline">
           Create
@@ -80,14 +80,12 @@ export default function EditorDialog() {
         {mediaUploader.attachments.length === 0 ? (
           <MediaPicker onFileSelected={onFileSelected} />
         ) : (
-          <MediaPreview
+          <MediaCropper
             setOpen={setOpen}
             uploader={mediaUploader}
             onFileSelected={onFileSelected}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            aspectRatio={aspectRatio}
-            setAspectRatio={setAspectRatio}
           />
         )}
       </DialogContent>

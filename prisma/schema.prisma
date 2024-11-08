@@ -16,25 +16,25 @@ datasource db {
 }
 
 model User {
-  id                    String         @id
-  username              String         @unique
-  displayName           String
-  email                 String?        @unique
-  passwordHash          String?
-  googleId              String?        @unique
-  avatarUrl             String?
-  bio                   String?
-  sessions              Session[]
-  posts                 Post[]
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
-  following             Follow[]       @relation("Following")
-  followers             Follow[]       @relation("Followers")
-  likes                 Like[]
-  collections           Collection[]
-  comments              Comment[]
+  id                  String         @id
+  username            String         @unique
+  displayName         String
+  email               String?        @unique
+  passwordHash        String?
+  googleId            String?        @unique
+  avatarUrl           String?
+  bio                 String?
+  sessions            Session[]
+  posts               Post[]
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  following           Follow[]       @relation("Following")
+  followers           Follow[]       @relation("Followers")
+  likes               Like[]
+  collections         Collection[]
+  comments            Comment[]
   receivedNotifications Notification[] @relation("Recipient")
-  issuedNotifications   Notification[] @relation("Issuer")
+  issuedNotifications Notification[] @relation("Issuer")
 
   @@map("users")
 }
@@ -53,15 +53,15 @@ model Post {
   id        String   @id @default(cuid())
   userId    String
   content   String?
-  title     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attachments         Media[]
-  likes               Like[]
-  collections         Collection[]
-  comments            Comment[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mediaRatio    Float?
+  attachments   Media[]
+  likes         Like[]
+  collections   Collection[]
+  comments      Comment[]
   linkedNotifications Notification[]
 
   @@map("posts")

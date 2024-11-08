@@ -4,12 +4,13 @@ import FollowingFeed from "@/components/FollowingFeed";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default async function Home() {
+
   return (
     <main className="flex h-full w-full gap-4">
-      <div className="flex h-full w-full flex-col items-center justify-start gap-4 py-4">
+      <div className="h-full w-full flex flex-col items-center justify-start py-4 gap-4">
         {/* <PostEditor /> */}
-        <Tabs defaultValue="for-you" className="w-full max-w-[1024px]">
-          <TabsList className="max-w-[640px]">
+        <Tabs defaultValue="for-you" className="w-full">
+          <TabsList>
             <TabsTrigger value="for-you">For You</TabsTrigger>
             <TabsTrigger value="following">Following</TabsTrigger>
           </TabsList>
@@ -21,7 +22,7 @@ export default async function Home() {
           </TabsContent>
         </Tabs>
       </div>
-      {/* <TrendsSidebar /> */}
+      <TrendsSidebar />
     </main>
   );
 }

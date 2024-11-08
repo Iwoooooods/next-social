@@ -35,6 +35,7 @@ import { Dispatch, SetStateAction, memo, RefObject } from "react";
 import { deleteAttachment } from "./action";
 import "./styles.css";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 const imageWidth = 512;
 const textEditorWidth = 384;
@@ -187,17 +188,19 @@ function MediaPreview({
     ],
     autofocus: true,
   });
+  const titleRef = useRef<HTMLInputElement>(null);
 
   const input = editor?.getText({ blockSeparator: "\n" }) || "";
+  const title = titleRef.current?.value || "";
 
   const onPostSubmit = async () => {
     mutation.mutate(
       {
         content: input,
+        title,
         mediaIds: uploader.attachments
           .map((attachment) => attachment.mediaId)
           .filter(Boolean) as string[],
-        mediaRatio: aspectRatio,
       },
       {
         onSuccess: () => {
@@ -318,7 +321,11 @@ function MediaPreview({
             variant="outline"
             loading={mutation.isPending}
             onClick={onPostSubmit}
-            disabled={mutation.isPending || input.trim().length === 0}
+            disabled={
+              mutation.isPending ||
+              title.trim().length === 0 ||
+              input.trim().length === 0
+            }
             className="h-[36px] w-[36px] rounded-full bg-card p-0 text-card-foreground hover:bg-card-foreground hover:text-card"
           >
             Post
@@ -457,6 +464,7 @@ function MediaPreview({
         {currentStep === "text" && (
           <TextEditor
             editor={editor}
+            titleRef={titleRef}
             size={{ width, height: width / aspectRatio }}
           />
         )}
@@ -555,8 +563,10 @@ function AttachmentButton({
 function TextEditor({
   editor,
   size,
+  titleRef,
 }: {
   editor: Editor | null;
+  titleRef: RefObject<HTMLInputElement>;
   size: { width: number; height: number };
 }) {
   const { user } = useSession();
@@ -566,13 +576,18 @@ function TextEditor({
       className="relative w-full max-w-sm space-y-4 border-2 border-border bg-card p-4 text-card-foreground outline-2"
       style={{ height: size.height, maxHeight: size.height }}
     >
-      <div className="flex h-full w-full flex-col">
+      <div className="flex h-full w-full flex-col gap-2">
         <div className="flex items-center">
           <UserAvatar
             avatarUrl={user.avatarUrl}
             className="mr-4 hidden sm:inline"
           />
         </div>
+        <Input
+          ref={titleRef}
+          placeholder="Add a title to make people see you!"
+          className="rounded-none border-2 border-border bg-transparent"
+        />
         <EditorContent
           editor={editor}
           className={`h-full max-h-full w-full overflow-y-auto rounded-md bg-transparent p-4`}

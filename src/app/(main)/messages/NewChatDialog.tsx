@@ -21,7 +21,7 @@ import { Check, Loader2, SearchIcon, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import UserAvatar from "@/components/UserAvatar";
 import LoadingButton from "@/components/LoadingButton";
-import UnauthorizedMessage from "@/components/UnauthorizedMessage";
+import { useRouter } from "next/navigation";
 
 export default function NewChatDialog({
   open,
@@ -35,7 +35,9 @@ export default function NewChatDialog({
   const { client, setActiveChannel } = useChatContext();
   const { toast } = useToast();
   const { user: loggedInUser } = useSession();
-  if (!loggedInUser) return null;
+  const router = useRouter();
+  if (!loggedInUser) router.push("/login");
+
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearchInput = useDebounce(searchInput, 500);
   const [selectedUsers, setSelectedUsers] = useState<
@@ -201,7 +203,11 @@ function SelectedUserTag({
   return (
     <div className="relative">
       <UserAvatar avatarUrl={user.image} size={48} />
-      <Button variant="ghost" onClick={onRemove} className="absolute -right-2 -top-2 hover:bg-transparent p-0 size-6">
+      <Button
+        variant="ghost"
+        onClick={onRemove}
+        className="absolute -right-2 -top-2 size-6 p-0 hover:bg-transparent"
+      >
         <X size={24} />
       </Button>
     </div>

@@ -27,6 +27,7 @@ import Resizer from "react-image-file-resizer";
 import CropImageDialog from "./CropImageDialog";
 import { useUpdateUserProfileMutation } from "./mutation";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function EditProfileDialog({
   user,
@@ -51,7 +52,6 @@ export default function EditProfileDialog({
   const mutation = useUpdateUserProfileMutation();
 
   async function onSubmit(values: UpdateUserValues) {
-
     const newAvatarUrl = croppedAvatar
       ? new File([croppedAvatar], `avatar_${user.id}.webp`)
       : undefined;
@@ -87,10 +87,7 @@ export default function EditProfileDialog({
   }, [croppedAvatar]);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={handleDialogClose}
-    >
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
@@ -125,7 +122,7 @@ export default function EditProfileDialog({
                   <FormControl>
                     <Textarea
                       placeholder="Give a short bio about yourself"
-                      className="resize-none min-h-24"
+                      className="min-h-24 resize-none"
                       {...field}
                     />
                   </FormControl>
@@ -163,10 +160,20 @@ function AvatarUploader({
   src: string;
   handleImageCropped: (blob: Blob | null) => void;
 }) {
+  const { toast } = useToast();
   const [imageToCrop, setImageToCrop] = useState<File>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleImageSelected = (image: File | undefined) => {
     if (!image) return;
+
+    if (image.size > 4.5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Image size must be less than 4.5MB",
+        variant: "destructive",
+      });
+      return;
+    }
 
     Resizer.imageFileResizer(
       image,

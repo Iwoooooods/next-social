@@ -2,7 +2,7 @@ import { validateRequest } from "@/auth";
 import { redirect } from "next/navigation";
 import SessionProvider from "./SessionProvider";
 import Navbar from "@/components/Navbar";
-import {MenuBar} from "@/components/MenuBar";
+import { MenuBar } from "@/components/MenuBar";
 import PostProvider from "./PostProvider";
 
 export default async function Layout({
@@ -19,9 +19,9 @@ export default async function Layout({
       <PostProvider>
         <div className="flex flex-col">
           <Navbar />
-        <div className="flex justify-center mx-auto w-full h-full px-4 gap-2">
-          <MenuBar className="py-4 px-2 mt-4" />
-          {children}
+          <div className="mx-auto flex h-full w-full max-w-7xl justify-center gap-2 px-4">
+            <MenuBar className="mt-4 px-2 py-4" />
+            {children}
           </div>
         </div>
       </PostProvider>

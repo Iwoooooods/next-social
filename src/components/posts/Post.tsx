@@ -10,12 +10,7 @@ import Linkify from "../Linkify";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTrigger,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription } from "../ui/dialog";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import LikeButton from "./LikeButton";
 import CollectButton from "./CollectionButton";
@@ -96,7 +91,7 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
 
       <Dialog open={open && postId === postProps.id} onOpenChange={onClose}>
         <DialogContent
-          className={`border-none bg-card p-0 text-card-foreground`}
+          className={`border-none bg-card p-0 text-card-foreground sm:rounded-none`}
           style={{ maxWidth: `${imageWidth + textWidth}px` }}
         >
           <VisuallyHidden.Root>

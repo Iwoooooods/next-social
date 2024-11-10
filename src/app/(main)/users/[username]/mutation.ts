@@ -1,22 +1,12 @@
 import { useToast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation";
-import {
-  useMutation,
-  useQueryClient,
-  QueryFilters,
-} from "@tanstack/react-query";
-import { useUploadThing } from "@/lib/uploadthing";
+import { useMutation } from "@tanstack/react-query";
 import { UpdateUserValues } from "@/lib/validation";
 import { updateUserProfile } from "./action";
+import { useRouter } from "next/navigation";
 
 export function useUpdateUserProfileMutation() {
   const { toast } = useToast();
-
   const router = useRouter();
-
-  const queryClient = useQueryClient();
-
-  const { startUpload: startAvatarUpload } = useUploadThing("avatar");
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -26,17 +16,17 @@ export function useUpdateUserProfileMutation() {
       values: UpdateUserValues;
       avatar?: File;
     }) => {
-      return Promise.all([
-        updateUserProfile(values),
-        avatar && startAvatarUpload([avatar]),
-      ]);
+      const resp =
+        avatar &&
+        (await fetch(`/api/file-upload/avatar?fileName=${avatar.name}`, {
+          method: "POST",
+          body: avatar,
+        }));
+      const avatarUrl = (await resp?.json())?.url;
+
+      return updateUserProfile({ ...values, avatarUrl });
     },
     onSuccess: async () => {
-      const queryFilter: QueryFilters = {
-        queryKey: ["user-posts"],
-      };
-
-      await queryClient.invalidateQueries(queryFilter);
       router.refresh();
 
       toast({
@@ -44,7 +34,8 @@ export function useUpdateUserProfileMutation() {
         description: "Your profile has been updated",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to update profile",

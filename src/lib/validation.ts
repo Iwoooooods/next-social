@@ -27,6 +27,7 @@ export const createPostSchema = z.object({
 export const updateUserSchema = z.object({
   displayName: requiredString,
   bio: z.string().max(1000, "Bio must be at most 1000 characters"),
+  avatarUrl: z.string().optional(),
 });
 
 export type UpdateUserValues = z.infer<typeof updateUserSchema>;

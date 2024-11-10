@@ -9,10 +9,13 @@ import { useSession } from "../../SessionProvider";
 import EditProfileButton from "./EditProfileButton";
 import Linkify from "@/components/Linkify";
 
-const UserProfile: React.FC<{ user: UserData; loggedInUserId: string }> = ({
+export default function UserProfile({
   user,
   loggedInUserId,
-}) => {
+}: {
+  user: UserData;
+  loggedInUserId: string;
+}) {
   const { user: loggedInUser } = useSession();
 
   const followerInfo: FollowerInfo = {
@@ -61,6 +64,4 @@ const UserProfile: React.FC<{ user: UserData; loggedInUserId: string }> = ({
       </div>
     </div>
   );
-};
-
-export default UserProfile;
+}

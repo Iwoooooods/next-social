@@ -7,26 +7,29 @@ import UnauthorizedMessage from "@/components/UnauthorizedMessage";
 import UserProfile from "./UserProfile";
 import UserPosts from "./UserPosts";
 import { Metadata } from "next";
-
 export const metadata: Metadata = {
   title: "Profile",
 };
 
-const getUser = cache(async (username: string, loggedInUserId: string) => {
-    const user = await prisma.user.findFirst({
-        where: {
-            username: {
-              equals: username,
-              mode: "insensitive",
-            },
-        },
-        select: getUserDataSelect(loggedInUserId),
-    })
-    
-    return user;
-})
+const getUser = async (username: string, loggedInUserId: string) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      username: {
+        equals: username,
+        mode: "insensitive",
+      },
+    },
+    select: getUserDataSelect(loggedInUserId),
+  });
 
-export default async function ProfilePage({ params }: { params: { username: string } }) {
+  return user;
+};
+
+export default async function ProfilePage({
+  params,
+}: {
+  params: { username: string };
+}) {
   const { user: loggedInUser } = await validateRequest();
 
   if (!loggedInUser) {
@@ -40,10 +43,9 @@ export default async function ProfilePage({ params }: { params: { username: stri
   }
 
   return (
-    <main className="flex flex-col items-center mt-4 gap-4 w-full h-full">
-      <UserProfile user={user} loggedInUserId={loggedInUser.id}/>
+    <main className="mt-4 flex h-full w-full flex-col items-center gap-4">
+      <UserProfile user={user} loggedInUserId={loggedInUser.id} />
       <UserPosts userId={user.id} />
     </main>
-  )
+  );
 }
-

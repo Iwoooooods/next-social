@@ -17,14 +17,6 @@ export default function useMediaUpload() {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const { isUploading, startUpload } = useUploadThing("attachment", {
-    // onBeforeUploadBegin(files) {
-    //   setAttachments((prev: Attachment[]) => [
-    //     ...prev,
-    //     ...files.map((file) => ({ file, isUploading: true })),
-    //   ]);
-    //   return files;
-    // },
-
     onUploadProgress: setUploadProgress,
 
     onClientUploadComplete(res) {
@@ -77,7 +69,7 @@ export default function useMediaUpload() {
     await startUpload(files);
   }
 
-   function removeAttachment(fileName: string) {
+  function removeAttachment(fileName: string) {
     setAttachments((prev) =>
       prev.filter((attachment) => attachment.file.name !== fileName),
     );

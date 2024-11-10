@@ -6,21 +6,21 @@ import { getUserDataSelect } from "@/lib/types";
 import prisma from "@/lib/prisma";
 
 export async function updateUserProfile(values: UpdateUserValues) {
-    const validatedValues = updateUserSchema.parse(values);
+  const validatedValues = updateUserSchema.parse(values);
 
-    const {user} = await validateRequest();
+  const { user } = await validateRequest();
 
-    if (!user) {
-        throw new Error("Unauthorized");
-    }
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
-    const updatedUser = await prisma.user.update({
-        where: {
-            id: user.id,
-        },
-        data: validatedValues,
-        select: getUserDataSelect(user.id),
-    });
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: validatedValues,
+    select: getUserDataSelect(user.id),
+  });
 
-    return updatedUser;
+  return updatedUser;
 }

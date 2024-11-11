@@ -13,7 +13,6 @@ import { MediaUploader } from "@/components/posts/editor/MediaUploader";
 import { useState } from "react";
 
 export default function NewPostDialog() {
-  const [attachments, setAttachments] = useState<File[]>([]);
   return (
     <Dialog>
       <DialogTrigger className="flex w-full items-center rounded-md px-4 py-2 hover:bg-accent hover:text-accent-foreground">
@@ -29,7 +28,7 @@ export default function NewPostDialog() {
             What&apos;s on your mind?
           </DialogDescription>
         </DialogHeader>
-        <MediaUploader onFileSelected={setAttachments} />
+        <MediaUploader />
       </DialogContent>
     </Dialog>
   );

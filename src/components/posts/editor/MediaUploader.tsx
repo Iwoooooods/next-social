@@ -31,11 +31,7 @@ function InstagramMedia({
   );
 }
 
-interface MediaUploaderProps {
-  onFileSelected: (files: File[]) => void;
-}
-
-export function MediaUploader({ onFileSelected }: MediaUploaderProps) {
+export function MediaUploader() {
   const { toast } = useToast();
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +49,6 @@ export function MediaUploader({ onFileSelected }: MediaUploaderProps) {
     }
 
     setAttachments((prev) => [...prev, ...filesArray]);
-    onFileSelected(filesArray);
   };
   return (
     <div className="flex min-h-[360px] w-full flex-col items-center justify-center gap-4 px-4">
@@ -67,7 +62,15 @@ export function MediaUploader({ onFileSelected }: MediaUploaderProps) {
         Drag and drop your images here
       </p>
       <InstagramMedia width={96} height={96} />
-      <Button onClick={() => fileInputRef.current?.click()} variant="outline">
+      <Button
+        onClick={() => {
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+            fileInputRef.current.click();
+          }
+        }}
+        variant="outline"
+      >
         <span className="text-md">Select from PC</span>
       </Button>
       {attachments.length > 0 && (

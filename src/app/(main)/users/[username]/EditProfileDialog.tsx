@@ -84,7 +84,7 @@ export default function EditProfileDialog({
         setCroppedAvatarUrl(null);
       };
     }
-  }, [croppedAvatar, croppedAvatarUrl]);
+  }, [croppedAvatar]);
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>

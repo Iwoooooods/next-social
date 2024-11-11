@@ -1,4 +1,5 @@
 import { validateRequest } from "@/auth";
+import prisma from "@/lib/prisma";
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
@@ -20,14 +21,22 @@ export async function POST(req: Request): Promise<NextResponse> {
     if (!req.body) {
       return NextResponse.json({ error: "File is required" }, { status: 400 });
     }
-    const blob = await put(`avatar/${fileName}`, req.body, {
+    const blob = await put(`medias/${user.id}/${fileName}`, req.body, {
       access: "public",
     });
-    return NextResponse.json(blob);
+
+    const media = await prisma.media.create({
+      data: {
+        url: blob.url,
+        type: "IMAGE",
+      },
+    });
+
+    return NextResponse.json(media);
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to upload avatar" },
+      { error: "Failed to upload media" },
       { status: 500 },
     );
   }

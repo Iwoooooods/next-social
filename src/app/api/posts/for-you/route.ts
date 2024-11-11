@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const cursor = req.nextUrl.searchParams.get("cursor") || undefined;
-    const pageSize = 5;
+    const pageSize = 4;
     const { user } = await validateRequest();
 
     if (!user) {

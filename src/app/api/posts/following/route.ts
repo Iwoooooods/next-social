@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const cursor = req.nextUrl.searchParams.get("cursor") || undefined;
-    const pageSize = 5;
+    const pageSize = 4;
     const { user } = await validateRequest();
 
     if (!user) {
@@ -14,15 +14,15 @@ export async function GET(req: NextRequest) {
     }
 
     const posts = await prisma.post.findMany({
-        where: {
-            user: {
-                followers: {
-                    some: {
-                        followerId: user.id
-                    }
-                }
-            }
+      where: {
+        user: {
+          followers: {
+            some: {
+              followerId: user.id,
+            },
+          },
         },
+      },
       include: getPostDataInclude(user.id),
       orderBy: { createdAt: "desc" },
       take: pageSize + 1,
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     const data: PostPage = {
       posts: posts.slice(0, pageSize),
       nextCursor,
-    }
+    };
     return Response.json(data);
   } catch (error) {
     return new Response("Internal Server Error", { status: 500 });

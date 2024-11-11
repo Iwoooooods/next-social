@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const cursor = req.nextUrl.searchParams.get("cursor") || undefined;
-    const pageSize = 5;
+    const pageSize = 4;
     const { user } = await validateRequest();
 
     if (!user) {
@@ -28,13 +28,12 @@ export async function GET(
     });
 
     const nextCursor = posts.length > pageSize ? posts[pageSize].id : null;
-    const data: PostPage = {    
+    const data: PostPage = {
       posts: posts.slice(0, pageSize),
       nextCursor,
     };
 
     return Response.json(data);
-
   } catch (error) {
     return new Response("Internal Server Error", { status: 500 });
   }

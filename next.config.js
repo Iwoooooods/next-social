@@ -14,7 +14,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL,
+        hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_HOST,
         port: "",
         pathname: "/**",
       },

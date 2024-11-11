@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const cursor = req.nextUrl.searchParams.get("cursor");
-    const pageSize = 5;
+    const pageSize = 4;
 
     const { user } = await validateRequest();
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -26,12 +26,13 @@ export async function GET(
       cursor: cursor ? { id: cursor } : undefined,
     });
 
-    const nextCursor = comments.length > pageSize ? comments[pageSize].id : null;
+    const nextCursor =
+      comments.length > pageSize ? comments[pageSize].id : null;
 
     const data: CommentPage = {
       comments: comments.slice(0, pageSize),
       nextCursor,
-    }
+    };
     return Response.json(data);
   } catch (error) {
     return Response.json({ error: "Internal Server Error" }, { status: 500 });

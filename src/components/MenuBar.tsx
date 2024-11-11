@@ -1,13 +1,8 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  HomeIcon,
-  BellIcon,
-  MessageCircleIcon,
-  BookmarkIcon,
-} from "lucide-react";
+import { HomeIcon, MessageCircleIcon, BookmarkIcon } from "lucide-react";
 import Link from "next/link";
-import EditorDialog from "./posts/editor/EditorDialog";
+import NewPostDialog from "@/components/posts/editor/NewPostDialog";
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import NotificationButton from "./notifications/NotificationButton";
@@ -34,12 +29,6 @@ export const MenuBar = async ({ className }: { className?: string }) => {
         </Link>
       </Button>
       <NotificationButton unread={unread} />
-      {/* <Button variant="ghost" title="Notifications" asChild>
-        <Link href="/notifications">
-          <BellIcon className="h-6 w-6" />
-          <span className="ml-2 hidden lg:inline">Notifications</span>
-        </Link>
-      </Button> */}
       <Button variant="ghost" title="Messages" asChild>
         <Link href="/messages">
           <MessageCircleIcon className="h-6 w-6" />
@@ -52,7 +41,7 @@ export const MenuBar = async ({ className }: { className?: string }) => {
           <span className="ml-2 hidden lg:inline">Collects</span>
         </Link>
       </Button>
-      <EditorDialog />
+      <NewPostDialog />
     </div>
   );
 };

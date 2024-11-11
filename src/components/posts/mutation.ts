@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";
-import { deletePost } from "./action";
+import { deletePost } from "@/components/posts/action";
 
 export function useDeletePostMutation() {
   const { toast } = useToast();
@@ -20,7 +20,9 @@ export function useDeletePostMutation() {
   const mutation = useMutation({
     mutationFn: deletePost,
     onSuccess: async (deletedPost) => {
-      const queryFilter: QueryFilters = { queryKey: ["post-feed"] };
+      const queryFilter: QueryFilters = {
+        queryKey: ["user-posts", deletedPost.user.id],
+      };
 
       await queryClient.cancelQueries(queryFilter);
 
@@ -52,7 +54,8 @@ export function useDeletePostMutation() {
       console.error(error);
       toast({
         variant: "destructive",
-        description: "Failed to delete post. May you not have the permission to delete it?",
+        description:
+          "Failed to delete post. May you not have the permission to delete it?",
       });
     },
   });

@@ -175,9 +175,7 @@ export default function PostPreview({
             setAttachments((prev) =>
               prev.filter((_, index) => index !== currentIndex),
             );
-            setCurrentIndex((prev) =>
-              prev === 0 ? 0 : (prev - 1) % attachments.length,
-            );
+            setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1));
           }}
         >
           <Minus size={24} />

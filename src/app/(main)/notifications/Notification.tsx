@@ -2,8 +2,7 @@
 
 import { NotificationData, NotificationPage } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { User2, MessageCircle, Heart, X } from "lucide-react";
-import Link from "next/link";
+import { Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/UserAvatar";
 import { NotificationType } from "@prisma/client";
@@ -15,7 +14,6 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
@@ -29,7 +27,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { deleteNotification } from "@/components/notifications/action";
 import { Loader2 } from "lucide-react";
-
+import Image from "next/image";
 const imageWidth = Number(process.env.DIALOG_IMAGE_WIDTH ?? "512");
 const textWidth = Number(process.env.DIALOG_TEXT_WIDTH ?? "384");
 
@@ -118,7 +116,7 @@ export default function Notification({
         {isPending ? (
           <Loader2 className="animate-spin" />
         ) : (
-          <X
+          <Minus
             size={24}
             className="cursor-pointer"
             onClick={handleNotificationDelete}
@@ -132,17 +130,27 @@ export default function Notification({
         >
           <div
             className={cn(
-              "relative flex w-full items-center justify-start gap-2 overflow-hidden",
+              "relative flex w-full items-center justify-start gap-4 overflow-hidden",
               !notification.read && "bg-primary/10",
             )}
           >
             <UserAvatar avatarUrl={notification.issuer.avatarUrl} size={48} />
-            <div className="flex flex-col items-center">
+            <div className="flex h-24 w-full flex-col items-center justify-center">
               <span className="w-full font-bold">
                 {notification.issuer.displayName}
               </span>
               <span className="w-full">{message}</span>
+              <hr className="w-full border-t-2 border-border mt-4" />
             </div>
+            {notification.post && (
+              <Image
+                src={notification.post.attachments[0].url}
+                alt="post image"
+                width={64}
+                height={64}
+                className="rounded-xl mr-4"
+              />
+            )}
           </div>
         </Button>
         {post && (
@@ -150,17 +158,10 @@ export default function Notification({
             open={open && postId === notification.postId}
             onOpenChange={onClose}
           >
-            <DialogContent
-              className={`z-50 border-none bg-card p-0 text-card-foreground`}
-              style={{ maxWidth: `${imageWidth + textWidth}px` }}
-            >
+            <DialogContent className="z-50 max-w-[896px] border-none bg-card p-0 text-card-foreground overflow-hidden">
               <VisuallyHidden.Root>
-                <DialogHeader>
-                  <DialogTitle>Profile</DialogTitle>
-                </DialogHeader>
-                <DialogDescription>
-                  See what&apos;s happening in the world right now
-                </DialogDescription>
+                <DialogHeader></DialogHeader>
+                <DialogDescription></DialogDescription>
               </VisuallyHidden.Root>
               <PostDetail postProps={post} />
             </DialogContent>

@@ -117,8 +117,9 @@ export function getNotificationInclude() {
   },
   post: {
     select: {
-      content: true,
-    },
+        content: true,
+        attachments: true,
+      },
     },
   } satisfies Prisma.NotificationInclude;
 }

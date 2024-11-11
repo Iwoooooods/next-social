@@ -35,15 +35,9 @@ export default function CommentInput({ post }: { post: PostData }) {
 
   return (
     <form className="relative flex items-center gap-2" onSubmit={handleSubmit}>
-      {/* <Input
-        placeholder="Add a comment..."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        autoFocus
-      /> */}
       <EditorContent
         editor={editor}
-        className="max-h-16 w-full overflow-y-auto bg-background p-2 pr-8"
+        className="max-h-16 w-full overflow-y-auto bg-background p-2 pr-8 rounded-xl"
       />
       <Button
         type="submit"

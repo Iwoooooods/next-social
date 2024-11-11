@@ -90,17 +90,10 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
       </AspectRatio>
 
       <Dialog open={open && postId === postProps.id} onOpenChange={onClose}>
-        <DialogContent
-          className={`border-none bg-card p-0 text-card-foreground sm:rounded-none`}
-          style={{ maxWidth: `${imageWidth + textWidth}px` }}
-        >
+        <DialogContent className="max-w-[896px] overflow-hidden border-none bg-card p-0 text-card-foreground">
           <VisuallyHidden.Root>
-            <DialogHeader>
-              <DialogTitle>Profile</DialogTitle>
-            </DialogHeader>
-            <DialogDescription>
-              See what&apos;s happening in the world right now
-            </DialogDescription>
+            <DialogHeader></DialogHeader>
+            <DialogDescription></DialogDescription>
           </VisuallyHidden.Root>
           <PostDetail postProps={postProps} />
         </DialogContent>

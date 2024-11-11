@@ -12,7 +12,6 @@ import UserAvatar from "@/components/UserAvatar";
 import FollowButton from "./FollowButton";
 import { useSession } from "@/app/(main)/SessionProvider";
 import { FollowerInfo } from "@/lib/types";
-import Linkify from "./Linkify";
 import Link from "next/link";
 
 interface UserTooltipProps extends PropsWithChildren {
@@ -32,10 +31,14 @@ export default function UserTooltip({ user, children }: UserTooltipProps) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent>
+        <TooltipTrigger>{children}</TooltipTrigger>
+        <TooltipContent
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <div className="flex flex-col gap-2 p-2">
-            <div className="flex gap-2 items-center w-full">
+            <div className="flex w-full items-center gap-2">
               <Link href={`/users/${user.username}`}>
                 <UserAvatar avatarUrl={user.avatarUrl} size={48} />
               </Link>

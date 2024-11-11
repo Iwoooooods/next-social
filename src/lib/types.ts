@@ -106,17 +106,13 @@ export interface CommentPage {
   nextCursor: string | null;
 }
 
-export function getNotificationInclude() {
+export function getNotificationInclude(loggedInUserId: string) {
   return {
     issuer: {
-      select: {
-      username: true,
-      displayName: true,
-      avatarUrl: true,
+      select: getUserDataSelect(loggedInUserId),
     },
-  },
-  post: {
-    select: {
+    post: {
+      select: {
         content: true,
         attachments: true,
       },

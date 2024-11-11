@@ -36,9 +36,7 @@ export const Post = ({ postProps }: { postProps: PostData }) => {
           <div className="self-start">{postProps.title}</div>
           <div className="flex w-full items-center justify-start gap-2">
             <UserTooltip user={postProps.user}>
-              <Link href={`/users/${postProps.user.username}`}>
-                <UserAvatar avatarUrl={postProps.user.avatarUrl} />
-              </Link>
+              <UserAvatar avatarUrl={postProps.user.avatarUrl} />
             </UserTooltip>
             <div className="flex flex-col text-sm">
               <Link href={`/users/${postProps.user.username}`}>
@@ -90,7 +88,10 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
       </AspectRatio>
 
       <Dialog open={open && postId === postProps.id} onOpenChange={onClose}>
-        <DialogContent className="max-w-[896px] overflow-hidden border-none bg-card p-0 text-card-foreground">
+        <DialogContent
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="max-w-[896px] overflow-hidden border-none bg-card p-0 text-card-foreground"
+        >
           <VisuallyHidden.Root>
             <DialogHeader></DialogHeader>
             <DialogDescription></DialogDescription>
@@ -169,11 +170,7 @@ export const PostDetail = ({ postProps }: { postProps: PostData }) => {
       >
         <div className="no-scrollbar flex max-h-[calc(100%-110px)] flex-col gap-2 overflow-y-scroll">
           <div className="flex w-full items-center justify-start gap-4">
-            <UserTooltip user={postProps.user}>
-              <Link href={`/users/${postProps.user.username}`}>
-                <UserAvatar avatarUrl={postProps.user.avatarUrl} />
-              </Link>
-            </UserTooltip>
+            <UserAvatar avatarUrl={postProps.user.avatarUrl} />
             <div className="flex flex-col">
               <Link href={`/users/${postProps.user.username}`}>
                 <span className="font-bold">{postProps.user.username}</span>

@@ -2,7 +2,7 @@
 
 import { NotificationData, NotificationPage } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Minus } from "lucide-react";
+import { Link, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/UserAvatar";
 import { NotificationType } from "@prisma/client";
@@ -28,8 +28,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { deleteNotification } from "@/components/notifications/action";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-const imageWidth = Number(process.env.DIALOG_IMAGE_WIDTH ?? "512");
-const textWidth = Number(process.env.DIALOG_TEXT_WIDTH ?? "384");
+import UserTooltip from "@/components/UserTooltip";
 
 export default function Notification({
   notification,
@@ -110,22 +109,14 @@ export default function Notification({
     if (!notification.id) return;
     mutate(notification.id);
   }
+
   return (
     <>
-      <div className="flex w-full items-center gap-2 pl-2 hover:bg-accent hover:text-accent-foreground">
-        {isPending ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          <Minus
-            size={24}
-            className="cursor-pointer"
-            onClick={handleNotificationDelete}
-          />
-        )}
+      <div className="flex w-full flex-col items-center px-4">
         <Button
           variant="ghost"
           onClick={handleClick}
-          className="block h-fit w-full cursor-pointer justify-start rounded-none px-0"
+          className="block h-fit w-full cursor-pointer justify-start rounded-none px-2 py-0"
           asChild
         >
           <div
@@ -134,13 +125,23 @@ export default function Notification({
               !notification.read && "bg-primary/10",
             )}
           >
-            <UserAvatar avatarUrl={notification.issuer.avatarUrl} size={48} />
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Minus
+                size={24}
+                className="cursor-pointer"
+                onClick={handleNotificationDelete}
+              />
+            )}
+            <UserTooltip user={notification.issuer}>
+              <UserAvatar avatarUrl={notification.issuer.avatarUrl} size={48} />
+            </UserTooltip>
             <div className="flex h-24 w-full flex-col items-center justify-center">
               <span className="w-full font-bold">
                 {notification.issuer.displayName}
               </span>
               <span className="w-full">{message}</span>
-              <hr className="w-full border-t-2 border-border mt-4" />
             </div>
             {notification.post && (
               <Image
@@ -148,17 +149,19 @@ export default function Notification({
                 alt="post image"
                 width={64}
                 height={64}
-                className="rounded-xl mr-4"
+                className="aspect-square rounded-xl object-cover"
               />
             )}
           </div>
         </Button>
+        <hr className="w-full border-t-2 border-border" />
+
         {post && (
           <Dialog
             open={open && postId === notification.postId}
             onOpenChange={onClose}
           >
-            <DialogContent className="z-50 max-w-[896px] border-none bg-card p-0 text-card-foreground overflow-hidden">
+            <DialogContent className="z-50 max-w-[896px] overflow-hidden border-none bg-card p-0 text-card-foreground">
               <VisuallyHidden.Root>
                 <DialogHeader></DialogHeader>
                 <DialogDescription></DialogDescription>

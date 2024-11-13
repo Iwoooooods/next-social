@@ -79,18 +79,17 @@ export default function PostPreview({
 
   async function handlePostSubmit() {
     setIsLoading(true);
-    const mediaIds = await Promise.all(
-      attachments.map(async (attachment) => {
-        const resp = await fetch(
-          `/api/file-upload/medias?fileName=${attachment.name}`,
-          {
-            method: "POST",
-            body: attachment,
-          },
-        );
-        return (await resp.json()).id;
-      }),
-    );
+    const mediaIds: string[] = [];
+    for (const attachment of attachments) {
+      const resp = await fetch(
+        `/api/file-upload/medias?fileName=${attachment.name}`,
+        {
+          method: "POST",
+          body: attachment,
+        },
+      );
+      mediaIds.push((await resp.json()).id);
+    }
     mutation.mutate(
       {
         content: input,

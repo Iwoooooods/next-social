@@ -21,7 +21,7 @@ export async function deleteNotification(id: string) {
 
   const deletedNotification = await prisma.notification.delete({
     where: { id },
-    include: getNotificationInclude(),
+    include: getNotificationInclude(user.id),
   });
 
   return deletedNotification;

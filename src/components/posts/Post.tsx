@@ -28,7 +28,7 @@ const textWidth = Number(process.env.DIALOG_TEXT_WIDTH ?? "384");
 export const Post = ({ postProps }: { postProps: PostData }) => {
   return (
     <>
-      <div className="group ml-2 mt-4 inline-block w-[240px] overflow-hidden text-card-foreground outline-2">
+      <div className="group inline-block w-[240px] overflow-hidden text-card-foreground outline-2">
         {postProps.attachments.length > 0 && (
           <DetailDialog postProps={postProps} />
         )}

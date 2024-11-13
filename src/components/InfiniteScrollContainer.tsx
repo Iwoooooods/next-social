@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useInView } from "react-intersection-observer";
 
 interface InfiniteScrollContainerProps extends React.PropsWithChildren {
@@ -7,6 +8,7 @@ interface InfiniteScrollContainerProps extends React.PropsWithChildren {
 
 export default function InfiniteScrollContainer({
   onBottomReached,
+  className,
   children,
 }: InfiniteScrollContainerProps) {
   const { ref } = useInView({
@@ -19,7 +21,12 @@ export default function InfiniteScrollContainer({
   });
 
   return (
-    <div className="px-auto w-full">
+    <div
+      className={cn(
+        "grid grid-cols-2 content-start gap-4 p-4 md:grid-cols-3 lg:grid-cols-4",
+        className,
+      )}
+    >
       {children}
       <div ref={ref} />
     </div>

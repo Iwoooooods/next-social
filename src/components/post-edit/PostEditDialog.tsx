@@ -57,7 +57,7 @@ export default function PostEditDialog({
   const [attachments, setAttachments] = useState<File[]>(
     post.attachments.map((attachment) => {
       return new File(
-        [attachment.url], // Using URL as minimal blob data
+        [attachment.url],
         attachment.url.split("/").pop() || "image.jpg",
         {
           type: "image/jpeg",
@@ -75,7 +75,6 @@ export default function PostEditDialog({
   const dialogCloseRef = useRef<HTMLButtonElement>(null);
 
   const input = editor?.getText({ blockSeparator: "\n" }) || "";
-  const title = titleRef.current?.value || "";
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -97,7 +96,7 @@ export default function PostEditDialog({
       setAttachments(files);
     }
 
-    if (post) {
+    if (post && open) {
       initializeAttachments(post);
       editor?.commands.setContent(post.content);
     }
@@ -124,28 +123,33 @@ export default function PostEditDialog({
   async function handlePostSaved() {
     try {
       setIsLoading(true);
-      const mediaIds = await Promise.all(
-        attachments.map(async (attachment) => {
-          const resp = await fetch(
-            `/api/file-upload/medias?fileName=${attachment.name}`,
-            {
-              method: "POST",
-              body: attachment,
-            },
-          );
-          return (await resp.json()).id;
-        }),
-      );
+      const mediaIds: string[] = [];
+      for (const attachment of attachments) {
+        const resp = await fetch(
+          `/api/file-upload/medias?fileName=${attachment.name}`,
+          {
+            method: "POST",
+            body: attachment,
+          },
+        );
+        mediaIds.push((await resp.json()).id);
+      }
 
       mutation.mutate(
         {
           postId: post.id,
           content: input,
-          title,
+          title: titleRef.current?.value || "",
           mediaIds,
         },
         {
           onSuccess: async () => {
+            toast({
+              title: "Success",
+              description: "Post saved successfully",
+              duration: 3000,
+            });
+
             onClose();
             editor?.commands.clearContent();
             setAttachments([]);
@@ -363,7 +367,9 @@ export default function PostEditDialog({
               initialTitle={post.title}
             />
             <LoadingButton
-              disabled={!input || !title || attachments.length === 0}
+              disabled={
+                !input || !titleRef.current?.value || attachments.length === 0
+              }
               loading={isLoading}
               variant="outline"
               onClick={handlePostSaved}
@@ -399,7 +405,7 @@ function TextEditor({
       </div>
       <Input
         ref={titleRef}
-        value={initialTitle}
+        defaultValue={initialTitle}
         placeholder="Title Here..."
         className="rounded-none border-none bg-transparent px-2 py-1 text-lg"
       />

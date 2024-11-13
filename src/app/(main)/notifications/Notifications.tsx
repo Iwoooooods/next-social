@@ -71,7 +71,7 @@ export default function Notifications() {
         onBottomReached={() => {
           hasNextPage && !isFetching && fetchNextPage();
         }}
-        className="max-w-64 border-r-2 border-border bg-card text-card-foreground outline-2"
+        className="border-r-2 border-border bg-card text-card-foreground outline-2"
       >
         {notifications.map((notification) => (
           <Notification key={notification.id} notification={notification} />

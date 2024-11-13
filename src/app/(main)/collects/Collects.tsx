@@ -45,6 +45,7 @@ export default function Collects() {
         onBottomReached={() => {
           hasNextPage && !isFetching && fetchNextPage();
         }}
+        className="grid grid-cols-2 content-start gap-4 md:grid-cols-3 lg:grid-cols-4"
       >
         {posts.map((post: PostData) => (
           <Post key={post.id} postProps={post} />

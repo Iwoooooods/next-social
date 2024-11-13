@@ -234,7 +234,7 @@ function TextEditor({
   const { user } = useSession();
 
   return (
-    <div className="relative h-full w-full max-w-sm border-2 border-border bg-card p-4 text-card-foreground outline-2">
+    <div className="relative h-full w-full max-w-sm bg-card p-4 text-card-foreground">
       <div className="flex items-center">
         <UserAvatar
           avatarUrl={user.avatarUrl}

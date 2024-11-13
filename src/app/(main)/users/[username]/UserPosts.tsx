@@ -44,6 +44,7 @@ export default function UserPosts({ userId }: { userId: string }) {
       onBottomReached={() => {
         hasNextPage && !isFetching && fetchNextPage();
       }}
+      className="grid grid-cols-2 content-start gap-4 md:grid-cols-3 lg:grid-cols-4"
     >
       {posts.map((post) => (
         <Post key={post.id} postProps={post} />

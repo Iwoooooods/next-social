@@ -23,6 +23,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useSubmitPostMutation } from "@/components/posts/editor/mutation";
 import LoadingButton from "@/components/LoadingButton";
+import "@/assets/css/styles.css";
 
 export default function PostPreview({
   attachments,
@@ -34,6 +35,7 @@ export default function PostPreview({
   setAttachments: React.Dispatch<React.SetStateAction<File[]>>;
 }) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bold: false,
@@ -74,6 +76,7 @@ export default function PostPreview({
     }, "image/jpeg");
     dialogCloseRef.current?.click();
   }
+
   async function handlePostSubmit() {
     setIsLoading(true);
     const mediaIds = await Promise.all(
@@ -232,7 +235,7 @@ function TextEditor({
   const { user } = useSession();
 
   return (
-    <div className="relative h-full w-full max-w-sm space-y-4 border-2 border-border bg-card p-4 text-card-foreground outline-2">
+    <div className="relative h-full w-full max-w-sm border-2 border-border bg-card p-4 text-card-foreground outline-2">
       <div className="flex items-center">
         <UserAvatar
           avatarUrl={user.avatarUrl}
@@ -241,12 +244,12 @@ function TextEditor({
       </div>
       <Input
         ref={titleRef}
-        placeholder="Add a title to make people see you!"
-        className="rounded-none border-2 border-border bg-transparent"
+        placeholder="Title Here..."
+        className="rounded-none border-none bg-transparent px-2 py-1 text-lg"
       />
       <EditorContent
         editor={editor}
-        className={`h-full max-h-full w-full overflow-y-auto rounded-md bg-transparent p-4`}
+        className={`h-full max-h-full w-full overflow-y-auto rounded-md bg-transparent px-2 py-1`}
       />
     </div>
   );

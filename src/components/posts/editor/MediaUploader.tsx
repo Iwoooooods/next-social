@@ -1,9 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import PostPreview from "@/components/posts/editor/PostPreview";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import "./styles.css";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 function InstagramMedia({
   width = 48,
@@ -35,6 +40,7 @@ export function MediaUploader() {
   const { toast } = useToast();
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFileSelected = (files: FileList | null) => {
     if (!files) return;
 
@@ -76,6 +82,11 @@ export function MediaUploader() {
       {attachments.length > 0 && (
         <Dialog open onOpenChange={() => setAttachments([])}>
           <DialogContent className="min-h-[512px] max-w-[896px] overflow-hidden bg-card p-0 text-card-foreground">
+            <VisuallyHidden.Root>
+              <DialogHeader>
+                <DialogTitle>Edit Post</DialogTitle>
+              </DialogHeader>
+            </VisuallyHidden.Root>
             <PostPreview
               attachments={attachments}
               setAttachments={setAttachments}

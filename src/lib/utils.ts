@@ -18,7 +18,7 @@ export function formatDate(date: Date) {
     return `${diffInMinutes} mins ago`;
   } else if (diffInHours < 24) {
     return `${diffInHours} hours ago`;
-  } else if (diffInDays < 30) {
+  } else if (diffInDays < 7) {
     return `${diffInDays} days ago`;
   } else {
     return date.toLocaleDateString();

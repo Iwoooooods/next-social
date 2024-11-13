@@ -4,7 +4,6 @@ import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import { getPostDataInclude } from "@/lib/types";
 import { createPostSchema } from "@/lib/validation";
-import { UTApi } from "uploadthing/server";
 
 export async function submitPost(input: {
   content: string;
@@ -32,8 +31,4 @@ export async function submitPost(input: {
   });
 
   return newPost;
-}
-
-export async function deleteAttachment(keys: string | string[]) {
-  await new UTApi().deleteFiles(keys);
 }

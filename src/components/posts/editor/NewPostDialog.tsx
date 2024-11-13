@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { SquarePen } from "lucide-react";
 import { MediaUploader } from "@/components/posts/editor/MediaUploader";
-import { useState } from "react";
 
 export default function NewPostDialog() {
   return (

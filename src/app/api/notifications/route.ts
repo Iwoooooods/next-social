@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       where: {
         recipientId: user.id,
       },
-      include: getNotificationInclude(),
+      include: getNotificationInclude(user.id),
       orderBy: { createdAt: "desc" },
       take: pageSize + 1,
       cursor: cursor ? { id: cursor } : undefined,

@@ -58,7 +58,7 @@ export default function Notifications() {
   if (status === "pending") return <NotificationSkeleton />;
   if (status === "success" && !hasNextPage && notifications.length === 0)
     return (
-      <div className="text-center text-muted-foreground">
+      <div className="ml-4 mt-4 text-center text-muted-foreground">
         No notifications found
       </div>
     );

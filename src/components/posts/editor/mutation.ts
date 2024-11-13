@@ -1,11 +1,5 @@
-import {
-  InfiniteData,
-  QueryFilters,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { PostPage } from "@/lib/types";
 import { submitPost } from "@/components/posts/editor/action";
 
 export function useSubmitPostMutation() {

@@ -29,6 +29,7 @@ import { deleteNotification } from "@/components/notifications/action";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import UserTooltip from "@/components/UserTooltip";
+import { formatDate } from "@/lib/utils";
 
 export default function Notification({
   notification,
@@ -142,6 +143,9 @@ export default function Notification({
                 {notification.issuer.displayName}
               </span>
               <span className="w-full">{message}</span>
+              <span className="w-full text-xs text-muted-foreground">
+                {formatDate(notification.createdAt)}
+              </span>
             </div>
             {notification.post && (
               <Image

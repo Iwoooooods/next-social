@@ -47,6 +47,7 @@ export default function PostPreview({
     ],
     autofocus: true,
   });
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -78,34 +79,43 @@ export default function PostPreview({
   }
 
   async function handlePostSubmit() {
-    setIsLoading(true);
-    const mediaIds: string[] = [];
-    for (const attachment of attachments) {
-      const resp = await fetch(
-        `/api/file-upload/medias?fileName=${attachment.name}`,
+    try {
+      setIsLoading(true);
+      const mediaIds: string[] = [];
+      // promise all to upload all attachments simultaneously
+      const uploadPromises = attachments.map(async (attachment) => {
+        const resp = await fetch(
+          `/api/file-upload/medias?fileName=${attachment.name}`,
+          {
+            method: "POST",
+            body: attachment,
+          },
+        );
+        const body = await resp.json();
+        mediaIds.push(body.id);
+      });
+      await Promise.all(uploadPromises);
+      mutation.mutate(
         {
-          method: "POST",
-          body: attachment,
+          content: input,
+          title,
+          mediaIds,
+        },
+        {
+          onSuccess: () => {
+            editor?.commands.clearContent();
+            setAttachments([]);
+            titleRef.current!.value = "";
+            setIsLoading(false);
+            dialogCloseRef.current?.click();
+          },
         },
       );
-      mediaIds.push((await resp.json()).id);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-    mutation.mutate(
-      {
-        content: input,
-        title,
-        mediaIds,
-      },
-      {
-        onSuccess: () => {
-          editor?.commands.clearContent();
-          setAttachments([]);
-          titleRef.current!.value = "";
-          setIsLoading(false);
-          dialogCloseRef.current?.click();
-        },
-      },
-    );
   }
 
   return (

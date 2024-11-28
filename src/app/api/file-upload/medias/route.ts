@@ -1,6 +1,7 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import { put } from "@vercel/blob";
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request): Promise<NextResponse> {
@@ -21,13 +22,24 @@ export async function POST(req: Request): Promise<NextResponse> {
     if (!req.body) {
       return NextResponse.json({ error: "File is required" }, { status: 400 });
     }
-    const blob = await put(`medias/${user.id}/${fileName}`, req.body, {
-      access: "public",
-    });
 
+    const mediaId = randomUUID();
+    const ext = fileName.split(".").pop();
+
+    const resp = await fetch(
+      `https://huaisen.hk.cpolar.io/api/upload/${user.id}/${mediaId}.${ext}`,
+      {
+        method: "POST",
+        body: req.body,
+        duplex: "half",
+      } as RequestInit,
+    );
+    const fileInfo = await resp.json();
     const media = await prisma.media.create({
       data: {
-        url: blob.url,
+        id: mediaId,
+        url: fileInfo.url,
+        md5: fileInfo.md5Hash,
         type: "IMAGE",
       },
     });

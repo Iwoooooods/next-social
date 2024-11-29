@@ -1,8 +1,6 @@
 import { PostData } from "@/lib/types";
-import { useState } from "react";
 import { useSubmitCommentMutation } from "./mutation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Send, Loader2 } from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -12,6 +10,7 @@ export default function CommentInput({ post }: { post: PostData }) {
   //   const [input, setInput] = useState<string>("");
   const mutation = useSubmitCommentMutation(post.id);
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bold: false,

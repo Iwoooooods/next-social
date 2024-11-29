@@ -12,6 +12,7 @@ export default function UserAvatar({
 }) {
   return (
     <Image
+      priority
       src={avatarUrl ?? "/default-avatar.png"}
       alt="User Avatar"
       width={size ?? 36}

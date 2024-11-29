@@ -75,8 +75,10 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
             src={postProps.attachments[0].url}
             alt="media"
             fill
+            priority
+            sizes="(max-width: 768px) 100vw, 240px"
             onClick={() => onOpen(postProps.id)}
-            objectFit="cover"
+            style={{ objectFit: 'cover' }}
           />
         </Button>
         {pathname === `/users/${postProps.user.username}` && (

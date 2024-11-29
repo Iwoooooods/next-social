@@ -93,7 +93,7 @@ export const DetailDialog = ({ postProps }: { postProps: PostData }) => {
           className="max-w-[896px] overflow-hidden border-none bg-card p-0 text-card-foreground"
         >
           <VisuallyHidden.Root>
-            <DialogHeader></DialogHeader>
+            <DialogTitle></DialogTitle>
             <DialogDescription></DialogDescription>
           </VisuallyHidden.Root>
           <PostDetail postProps={postProps} />

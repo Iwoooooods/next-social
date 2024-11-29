@@ -38,18 +38,16 @@ export default function DeletePostDialog({
             loading={mutation.isPending}
             variant="destructive"
             onClick={async () => {
+              mutation.mutate(post.id, { onSuccess: () => onClose() });
               await Promise.all([
-                mutation.mutate(post.id, { onSuccess: () => onClose() }),
-                Promise.all(
-                  post.attachments.map((attachment) =>
-                    fetch(
-                      `${process.env.FILE_SERVER_URL}/media-delete?url=${encodeURIComponent(
-                        attachment.url,
-                      )}`,
-                      { method: "DELETE" },
-                    ),
-                  ),
-                ),
+                ...post.attachments.map((attachment) => {
+                  const fileName = attachment.url.split("/").pop();
+                  if (!fileName) return;
+                  return fetch(
+                    `${process.env.NEXT_PUBLIC_FILE_SERVER_URL}/delete/${post.user.id}/${fileName}`,
+                    { method: "DELETE" },
+                  );
+                }),
               ]);
             }}
           >

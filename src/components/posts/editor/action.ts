@@ -24,10 +24,17 @@ export async function submitPost(input: {
       title,
       userId: user.id,
       attachments: {
-        connect: mediaIds.map((id) => ({ id })),
+        connect: mediaIds.map((id) => ({ id})),
       },
     },
-    include: getPostDataInclude(user.id),
+    include: {
+      ...getPostDataInclude(user.id),
+      attachments: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
   });
 
   return newPost;

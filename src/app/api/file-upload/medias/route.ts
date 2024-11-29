@@ -1,6 +1,5 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
-import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 
@@ -12,6 +11,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(req.url);
 
+    const order = searchParams.get("order");
     const fileName = searchParams.get("fileName");
     if (!fileName) {
       return NextResponse.json(
@@ -41,6 +41,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         url: fileInfo.url,
         md5: fileInfo.md5Hash,
         type: "IMAGE",
+        order: order ? parseInt(order) : undefined,
       },
     });
 

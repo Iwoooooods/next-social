@@ -97,7 +97,7 @@ model Media {
   type   MediaType
   url    String
   md5    String?
-
+  order  Int?
   createdAt DateTime @default(now())
 
   @@map("post_media")

@@ -43,7 +43,7 @@ export default function DeletePostDialog({
                 Promise.all(
                   post.attachments.map((attachment) =>
                     fetch(
-                      `/api/file-upload/media-delete?url=${encodeURIComponent(
+                      `${process.env.FILE_SERVER_URL}/media-delete?url=${encodeURIComponent(
                         attachment.url,
                       )}`,
                       { method: "DELETE" },

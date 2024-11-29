@@ -35,7 +35,11 @@ export function getPostDataInclude(loggedInUserId: string) {
     user: {
       select: getUserDataSelect(loggedInUserId),
     },
-    attachments: true,
+    attachments: {
+      orderBy: {
+        order: "asc",
+      },
+    },
     likes: {
       where: {
         userId: loggedInUserId,

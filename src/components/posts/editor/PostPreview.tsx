@@ -81,20 +81,20 @@ export default function PostPreview({
   async function handlePostSubmit() {
     try {
       setIsLoading(true);
-      const mediaIds: string[] = [];
       // promise all to upload all attachments simultaneously
-      const uploadPromises = attachments.map(async (attachment) => {
+      const uploadPromises = attachments.map(async (attachment, index) => {
         const resp = await fetch(
-          `/api/file-upload/medias?fileName=${attachment.name}`,
+          `/api/file-upload/medias?fileName=${attachment.name}&order=${index}`,
           {
             method: "POST",
             body: attachment,
           },
         );
         const body = await resp.json();
-        mediaIds.push(body.id);
+        return body.id;
       });
-      await Promise.all(uploadPromises);
+      const mediaIds = await Promise.all(uploadPromises);
+
       mutation.mutate(
         {
           content: input,
